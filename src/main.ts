@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common/pipes';
 import { join } from 'path';
 import * as express from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import cors from 'cors'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,12 +13,13 @@ async function bootstrap() {
   // socket
   app.useWebSocketAdapter(new IoAdapter(app))
 
-  app.enableCors({
-    allowedHeaders: '*',
-    origin: '*',
-  });
+  // app.enableCors({
+  //   allowedHeaders: '*',
+  //   origin: '*',
+  // });
 
   // middleware
+  app.use(cors())
   app.use(express.json())
   app.setGlobalPrefix('/api/v1/');
   app.use('/files', express.static(join(__dirname, '..', 'files')));
