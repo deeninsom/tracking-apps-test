@@ -12,12 +12,10 @@ async function bootstrap() {
   // socket
   app.useWebSocketAdapter(new IoAdapter(app))
 
-
   app.enableCors({
     allowedHeaders: '*',
     origin: '*',
   });
-
 
   // middleware
   app.use(express.json())
