@@ -19,7 +19,9 @@ async function bootstrap() {
   // });
 
   // middleware
-  app.use(cors())
+  // app.use(cors({
+  //   origin: ['*']
+  // }))
   app.use(express.json())
   app.setGlobalPrefix('/api/v1/');
   app.use('/files', express.static(join(__dirname, '..', 'files')));
