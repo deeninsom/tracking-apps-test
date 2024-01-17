@@ -1,6 +1,6 @@
 import {
   Controller,
-  // UseGuards,
+  UseGuards,
   Get,
   Post,
   Put,
@@ -14,16 +14,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
-// import { AuthGuard } from '../auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 
 @ApiTags('users')
 @Controller('users')
-// @UseGuards(AuthGuard)
-// @ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('access-token')
 export class UsersController {
-  constructor(private readonly userService: UsersService) { }
+  constructor(private readonly userService: UsersService) {}
 
   @Get()
   async get(
@@ -44,7 +44,7 @@ export class UsersController {
         page: currentPage,
         totalPages,
         totalRows,
-        data
+        data,
       });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -52,13 +52,11 @@ export class UsersController {
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -67,26 +65,22 @@ export class UsersController {
   async getUserById(@Param('id') id: string, @Res() res: Response) {
     try {
       const data = await this.userService.getId(id);
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: 'Berhasil menampilkan user',
-          data,
-        });
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menampilkan user',
+        data,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -95,26 +89,22 @@ export class UsersController {
   async create(@Body() payload: CreateUserDto, @Res() res: Response) {
     try {
       const data = await this.userService.create(payload);
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: 'Berhasil menambahkan user.',
-          data,
-        });
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menambahkan user.',
+        data,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -128,21 +118,19 @@ export class UsersController {
     try {
       const data = await this.userService.update(id, payload);
       return res
-      .status(200)
-      .json({ status: true, message: 'Berhasil update user.', data});
+        .status(200)
+        .json({ status: true, message: 'Berhasil update user.', data });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -160,13 +148,11 @@ export class UsersController {
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }

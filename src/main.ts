@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // socket
-  app.useWebSocketAdapter(new IoAdapter(app))
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   app.enableCors({
     allowedHeaders: '*',
@@ -22,7 +22,7 @@ async function bootstrap() {
   // app.use(cors({
   //   origin: ['*']
   // }))
-  app.use(express.json())
+  app.use(express.json());
   app.setGlobalPrefix('/api/v1/');
   app.use('/files', express.static(join(__dirname, '..', 'files')));
 
@@ -73,7 +73,7 @@ async function bootstrap() {
     ],
   });
 
-  await app.listen(8080);
+  await app.listen(8081);
 }
 
 // async function socket() {
