@@ -13,6 +13,9 @@ import cloudinaryConfig from './modules/cloudinary/cloudinary.config';
 // entity
 import Users from './modules/user/user.entity';
 import { SocketModule } from './modules/socket/socket.module';
+import UserLocations from './modules/location-user/location-user.entity';
+import { UserLocationModule } from './modules/location-user/location-user.module';
+
 
 
 @Module({
@@ -28,7 +31,7 @@ import { SocketModule } from './modules/socket/socket.module';
 
     MulterModule.register(),
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: 'mysql',
       host: process.env.DATABASE_HOST,
       port: parseInt(process.env.DATABASE_PORT, 10),
       username: process.env.DATABASE_USERNAME,
@@ -37,12 +40,14 @@ import { SocketModule } from './modules/socket/socket.module';
       synchronize: true,
       entities: [
         Users,
+        UserLocations
       ],
     }),
 
     AuthModule,
     UserModule,
-    SocketModule
+    UserLocationModule,
+    SocketModule,
   ],
   controllers: [ImageController],
   providers: [CloudinaryService],

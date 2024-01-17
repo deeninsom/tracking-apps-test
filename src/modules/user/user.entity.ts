@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import UserLocations from '../location-user/location-user.entity';
 
 
 export enum Role {
@@ -44,6 +46,13 @@ export default class Users {
 
   @Column({ type: 'enum', enum: Role })
   role: string;
+
+  @OneToMany(() => UserLocations, (location) => location.user_id, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  location_users: UserLocations[];
 
   @CreateDateColumn()
   public created_at: Date;

@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common/pipes';
 import { join } from 'path';
 import * as express from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import * as cors from 'cors'
+// import * as cors from 'cors'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,10 +13,10 @@ async function bootstrap() {
   // socket
   app.useWebSocketAdapter(new IoAdapter(app))
 
-  // app.enableCors({
-  //   allowedHeaders: '*',
-  //   origin: '*',
-  // });
+  app.enableCors({
+    allowedHeaders: '*',
+    origin: '*',
+  });
 
   // middleware
   // app.use(cors({
