@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 
 @Injectable()
@@ -8,9 +8,9 @@ export class UserLocationService {
   constructor(
     @InjectRepository(UserLocations)
     private locationUserRepository: Repository<UserLocations>,
-  ) {}
+  ) { }
 
-  async get(userId: string, year: any, month: any, date: any) {
+  async get(userId: string, year: any, month: any, day: any, page: number, limit: number) {
     const queryBuilder =
       this.locationUserRepository.createQueryBuilder('lokasi_user');
 
@@ -26,21 +26,36 @@ export class UserLocationService {
       });
     }
 
+    if (day) {
+      queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', {
+        created_at: day,
+      });
+    }
+
     if (userId) {
-      queryBuilder.orWhere('lokasi_user.user_id LIKE :user_id', {
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
         user_id: userId,
       });
     }
 
-    const result = await queryBuilder.getMany();
-    return result;
+    if (page <= 0) {
+      page = 1;
+    }
 
-    // const userLocations = await this.locationUserRepository.find({
-    //   where: whereConditions,
-    //   order: { created_at: 'DESC' },
-    // });
+    const skip = (page - 1) * limit;
+    const [data, total] = await queryBuilder
+      .take(limit)
+      .skip(skip)
+      .getManyAndCount();
 
-    // return userLocations;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: data || [],
+      page,
+      totalPages,
+      totalRows: total,
+    };
   }
 
   async getId(id: string): Promise<UserLocations> {

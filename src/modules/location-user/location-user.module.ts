@@ -6,10 +6,11 @@ import { jwtConfigFactory } from '../auth/jwt.config';
 import UserLocations from './location-user.entity';
 import { UserLocationService } from './location-user.service';
 import { UserLocationController } from './location-user.controller';
+import Users from '../user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserLocations]),
+    TypeOrmModule.forFeature([Users, UserLocations]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: jwtConfigFactory,

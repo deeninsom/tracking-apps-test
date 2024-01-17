@@ -1,6 +1,6 @@
 import {
   Controller,
-  // UseGuards,
+  UseGuards,
   Get,
   Post,
   Put,
@@ -8,12 +8,11 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
   Res,
   HttpException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-// import { AuthGuard } from '../auth/auth.guard';
+import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
 import { UserLocationService } from './location-user.service';
 import {
@@ -24,10 +23,10 @@ import {
 
 @ApiTags('user-locations')
 @Controller('users-locations')
-// @UseGuards(AuthGuard)
-// @ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('access-token')
 export class UserLocationController {
-  constructor(private readonly userLocationService: UserLocationService) {}
+  constructor(private readonly userLocationService: UserLocationService) { }
 
   @Get()
   async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
@@ -37,6 +36,8 @@ export class UserLocationController {
         query.year,
         query.month,
         query.date,
+        query.page,
+        query.limit
       );
       return res.status(200).json({
         status: true,

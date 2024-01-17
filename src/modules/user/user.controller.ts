@@ -16,7 +16,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
+import { CreateUserDto, QueryUserDTO, UpdateUserDto } from './user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -27,8 +27,7 @@ export class UsersController {
 
   @Get()
   async get(
-    @Query('page', ParseIntPipe) page: number,
-    @Query('limit', ParseIntPipe) limit: number,
+    @Query() query: QueryUserDTO,
     @Res() res: Response,
   ) {
     try {
@@ -37,7 +36,7 @@ export class UsersController {
         page: currentPage,
         totalPages,
         totalRows,
-      } = await this.userService.get(page, limit);
+      } = await this.userService.get(query.page, query.limit);
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan user',

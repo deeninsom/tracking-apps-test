@@ -63,3 +63,20 @@ export class UpdateUserDto {
   @IsOptional()
   role?: string;
 }
+
+export class QueryUserDTO {
+  @ApiProperty({
+    description: 'get page',
+    required: false,
+  })
+  @IsOptional()
+  page?: number;
+
+  @ApiProperty({
+    description: 'get limit',
+    required: false,
+  })
+  @IsOptional()
+  limit?: number;
+
+}
