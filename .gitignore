@@ -3,6 +3,7 @@
 /node_modules
 package-lock.json
 .env.development
+.env.production
 
 # Logs
 logs
