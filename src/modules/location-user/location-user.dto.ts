@@ -1,6 +1,6 @@
-import { IsOptional } from "@nestjs/class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { IsOptional } from '@nestjs/class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateUserLocationDTO {
   @ApiProperty()
@@ -27,15 +27,29 @@ export class UpdateUserLocationDTO {
 export class QueryUserLocationDTO {
   @ApiProperty({
     description: 'find By user_id',
-    required: false
+    required: false,
   })
   @IsOptional()
-  user_id?: string
+  user_id?: string;
+
+  @ApiProperty({
+    description: 'find By year',
+    required: false,
+  })
+  @IsOptional()
+  year?: number;
+
+  @ApiProperty({
+    description: 'find By month',
+    required: false,
+  })
+  @IsOptional()
+  month?: string;
 
   @ApiProperty({
     description: 'find By date',
-    required: false
+    required: false,
   })
   @IsOptional()
-  created_at?: string
+  date?: string;
 }

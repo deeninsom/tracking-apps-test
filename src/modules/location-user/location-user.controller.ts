@@ -16,26 +16,32 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 // import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
 import { UserLocationService } from './location-user.service';
-import { CreateUserLocationDTO, QueryUserLocationDTO, UpdateUserLocationDTO } from './location-user.dto';
+import {
+  CreateUserLocationDTO,
+  QueryUserLocationDTO,
+  UpdateUserLocationDTO,
+} from './location-user.dto';
 
 @ApiTags('user-locations')
 @Controller('users-locations')
 // @UseGuards(AuthGuard)
 // @ApiBearerAuth('access-token')
 export class UserLocationController {
-  constructor(private readonly userLocationService: UserLocationService) { }
+  constructor(private readonly userLocationService: UserLocationService) {}
 
   @Get()
-  async get(
-    @Query() query: QueryUserLocationDTO,
-    @Res() res: Response,
-  ) {
+  async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
     try {
-      const data= await this.userLocationService.get(query.user_id, query.created_at);
+      const data = await this.userLocationService.get(
+        query.user_id,
+        query.year,
+        query.month,
+        query.date,
+      );
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan lokasi user',
-        data
+        data,
       });
     } catch (error) {
       if (error instanceof HttpException) {
@@ -43,13 +49,11 @@ export class UserLocationController {
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -58,26 +62,22 @@ export class UserLocationController {
   async getUserById(@Param('id') id: string, @Res() res: Response) {
     try {
       const data = await this.userLocationService.getId(id);
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: 'Berhasil menampilkan lokasi user',
-          data,
-        });
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menampilkan lokasi user',
+        data,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -86,26 +86,22 @@ export class UserLocationController {
   async create(@Body() payload: CreateUserLocationDTO, @Res() res: Response) {
     try {
       const data = await this.userLocationService.create(payload);
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: 'Berhasil menambahkan lokasi user.',
-          data,
-        });
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menambahkan lokasi user.',
+        data,
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -119,21 +115,19 @@ export class UserLocationController {
     try {
       const data = await this.userLocationService.update(id, payload);
       return res
-      .status(200)
-      .json({ status: true, message: 'Berhasil update lokasi user.', data});
+        .status(200)
+        .json({ status: true, message: 'Berhasil update lokasi user.', data });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }
@@ -144,20 +138,22 @@ export class UserLocationController {
       await this.userLocationService.delete(id);
       return res
         .status(200)
-        .json({ status: true, message: 'Berhasil menghapus lokasi user.', data: {} });
+        .json({
+          status: true,
+          message: 'Berhasil menghapus lokasi user.',
+          data: {},
+        });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
           .status(error.getStatus())
           .json({ status: false, message: error.message });
       } else {
-        return res
-          .status(500)
-          .json({
-            status: false,
-            message: 'Terjadi kesalahan server !',
-            error: error.message,
-          });
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
       }
     }
   }

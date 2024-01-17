@@ -14,10 +14,10 @@ export default class UserLocations {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double', nullable: true })
   lat: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double', nullable: true })
   lng: number;
 
   @ManyToOne(() => Users)
