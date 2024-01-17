@@ -8,7 +8,6 @@ import {
   Param,
   Body,
   Query,
-  ParseIntPipe,
   Res,
   HttpException,
 } from '@nestjs/common';
