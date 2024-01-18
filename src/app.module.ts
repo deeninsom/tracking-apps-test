@@ -15,6 +15,9 @@ import Users from './modules/user/user.entity';
 import { SocketModule } from './modules/socket/socket.module';
 import UserLocations from './modules/location-user/location-user.entity';
 import { UserLocationModule } from './modules/location-user/location-user.module';
+import WorkLocations from './modules/work-location/entity/work-location.entity';
+import WorkLocationLists from './modules/work-location/entity/work.location-list.entity';
+import { WorkLocationModule } from './modules/work-location/work-location.module';
 
 
 
@@ -40,13 +43,16 @@ import { UserLocationModule } from './modules/location-user/location-user.module
       synchronize: true,
       entities: [
         Users,
-        UserLocations
+        UserLocations,
+        WorkLocations,
+        WorkLocationLists
       ],
     }),
 
     AuthModule,
     UserModule,
     UserLocationModule,
+    WorkLocationModule,
     SocketModule,
   ],
   controllers: [ImageController],

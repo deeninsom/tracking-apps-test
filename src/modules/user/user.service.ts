@@ -11,12 +11,14 @@ export class UsersService {
     private userRepository: Repository<Users>,
   ) { }
 
-  async get(page: number, limit: number): Promise<{
-    data: Users[],
-    page: number,
-    totalPages: number,
-    totalRows: number
-  }> {
+  async get(page: number, limit: number): Promise<
+    {
+      data: Users[],
+      page: number,
+      totalPages: number,
+      totalRows: number
+    }
+  > {
     if (page <= 0) {
       page = 1;
     }

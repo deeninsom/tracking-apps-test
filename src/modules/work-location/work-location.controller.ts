@@ -14,42 +14,30 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
-import { UserLocationService } from './location-user.service';
+import { WorkLocationService } from './work-location.service';
 import {
-  CreateUserLocationDTO,
-  QueryUserLocationDTO,
-  UpdateUserLocationDTO,
-} from './location-user.dto';
+ CreateWorkLocationDTO,
+ UpdateWorkLocationDTO,
+ QueryWorkLocationDTO
+} from './work-location.dto';
 
-@ApiTags('user-locations')
-@Controller('user-locations')
-@UseGuards(AuthGuard)
-@ApiBearerAuth('access-token')
-export class UserLocationController {
-  constructor(private readonly userLocationService: UserLocationService) { }
+@ApiTags('work-locations')
+@Controller('work-locations')
+// @UseGuards(AuthGuard)
+// @ApiBearerAuth('access-token')
+export class WorkLocationController {
+  constructor(private readonly workLocationService: WorkLocationService) { }
 
   @Get()
-  async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
+  async get(@Query() query: QueryWorkLocationDTO, @Res() res: Response) {
     try {
-      const {
-        data,
-        page: currentPage,
-        totalPages,
-        totalRows,
-      } = await this.userLocationService.get(
-        query.user_id,
-        query.year,
-        query.month,
-        query.date,
+      const data = await this.workLocationService.get(
         query.page,
         query.limit
       );
       return res.status(200).json({
         status: true,
-        message: 'Berhasil menampilkan lokasi user',
-        page: currentPage,
-        totalPages,
-        totalRows,
+        message: 'Berhasil menampilkan lokasi',
         data,
       });
     } catch (error) {
@@ -70,10 +58,10 @@ export class UserLocationController {
   @Get(':id')
   async getUserById(@Param('id') id: string, @Res() res: Response) {
     try {
-      const data = await this.userLocationService.getId(id);
+      const data = await this.workLocationService.getId(id);
       return res.status(200).json({
         status: true,
-        message: 'Berhasil menampilkan lokasi user',
+        message: 'Berhasil menampilkan lokasi',
         data,
       });
     } catch (error) {
@@ -92,12 +80,12 @@ export class UserLocationController {
   }
 
   @Post()
-  async create(@Body() payload: CreateUserLocationDTO, @Res() res: Response) {
+  async create(@Body() payload: CreateWorkLocationDTO, @Res() res: Response) {
     try {
-      const data = await this.userLocationService.create(payload);
+      const data = await this.workLocationService.create(payload);
       return res.status(200).json({
         status: true,
-        message: 'Berhasil menambahkan lokasi user.',
+        message: 'Berhasil menambahkan lokasi.',
         data,
       });
     } catch (error) {
@@ -118,14 +106,14 @@ export class UserLocationController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() payload: UpdateUserLocationDTO,
+    @Body() payload: UpdateWorkLocationDTO,
     @Res() res: Response,
   ) {
     try {
-      const data = await this.userLocationService.update(id, payload);
+      const data = await this.workLocationService.update(id, payload);
       return res
         .status(200)
-        .json({ status: true, message: 'Berhasil update lokasi user.', data });
+        .json({ status: true, message: 'Berhasil update lokasi.', data });
     } catch (error) {
       if (error instanceof HttpException) {
         return res
@@ -144,12 +132,12 @@ export class UserLocationController {
   @Delete(':id')
   async delete(@Param('id') id: string, @Res() res: Response) {
     try {
-      await this.userLocationService.delete(id);
+      await this.workLocationService.delete(id);
       return res
         .status(200)
         .json({
           status: true,
-          message: 'Berhasil menghapus lokasi user.',
+          message: 'Berhasil menghapus lokasi.',
           data: {},
         });
     } catch (error) {
