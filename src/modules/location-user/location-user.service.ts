@@ -11,52 +11,32 @@ export class UserLocationService {
   ) { }
 
   async get(userId: string, year: any, month: any, day: any, page: number, limit: number) {
-    const queryBuilder =
-      this.locationUserRepository.createQueryBuilder('lokasi_user');
-
-    if (year) {
-      queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', {
-        created_at: year,
-      });
+    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+  
+    if (year) queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', { created_at: year });
+    if (month) queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', { created_at: month });
+    if (day) queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', { created_at: day });
+    if (userId) queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
+  
+    let dataQuery = queryBuilder;
+  
+    if (limit && page) {
+      const skip = (page - 1) * limit;
+      dataQuery = dataQuery.take(limit).skip(skip);
     }
-
-    if (month) {
-      queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', {
-        created_at: month,
-      });
-    }
-
-    if (day) {
-      queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', {
-        created_at: day,
-      });
-    }
-
-    if (userId) {
-      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
-        user_id: userId,
-      });
-    }
-
-    if (page <= 0) {
-      page = 1;
-    }
-
-    const skip = (page - 1) * limit;
-    const [data, total] = await queryBuilder
-      .take(limit)
-      .skip(skip)
-      .getManyAndCount();
-
-    const totalPages = Math.ceil(total / limit);
-
+  
+    const [data, total] = await dataQuery.getManyAndCount();
+    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+  
     return {
       data: data || [],
-      page,
+      page: limit && page ? page : undefined,
       totalPages,
       totalRows: total,
     };
   }
+  
 
   async getId(id: string): Promise<UserLocations> {
     const userLocation = await this.locationUserRepository.findOne({
