@@ -61,7 +61,7 @@ export class AuthService {
     });
 
     if (!user)
-      throw new HttpException('Email tidak ditemukan !', HttpStatus.NOT_FOUND);
+      throw new HttpException('Username tidak ditemukan !', HttpStatus.NOT_FOUND);
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch)
