@@ -11,29 +11,18 @@ export class UsersService {
     private userRepository: Repository<Users>,
   ) { }
 
-  async get(page: number, limit: number): Promise<
-    {
-      data: Users[],
-      page: number,
-      totalPages: number,
-      totalRows: number
+  async get(page: number, limit: number) {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    let dataQuery = queryBuilder;
+    if (limit && page) {
+      const skip = (page - 1) * limit;
+      dataQuery = dataQuery.take(limit).skip(skip);
     }
-  > {
-    if (page <= 0) {
-      page = 1;
-    }
-
-    const skip = (page - 1) * limit;
-    const [data, total] = await this.userRepository.findAndCount({
-      take: limit,
-      skip
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
+    const [data, total] = await dataQuery.getManyAndCount();
+    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
     return {
       data: data || [],
-      page,
+      page: limit && page ? page : undefined,
       totalPages,
       totalRows: total,
     };
