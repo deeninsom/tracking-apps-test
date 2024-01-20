@@ -57,7 +57,7 @@ export class WorkLocationService {
     const { location: locations } = payload;
 
     if (locations && locations.length > 0) {
-      const locationListEntities = locations.map((loc) =>
+      const locationListEntities = locations.map((loc: any) =>
         this.workLocationListRepository.create({
           lat: loc.lat,
           lng: loc.lng,
