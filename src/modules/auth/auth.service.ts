@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import Users from '../user/user.entity';
 import {
   LoginDto,
-  RegisterDto,
+  // RegisterDto,
 } from './auth.dto';
 
 @Injectable()
@@ -17,46 +17,46 @@ export class AuthService {
     private jwtService: JwtService,
   ) { }
 
-  async register(
-    registerDto: RegisterDto,
-  ): Promise<{ id: string; name: string; role: string; jwt_token: string }> {
-    const {name, phone, address, password } = registerDto;
-    await this.validateEmailUniqueness(name);
+  // async register(
+  //   registerDto: RegisterDto,
+  // ): Promise<{ id: string; username: string; role: string; jwt_token: string }> {
+  //   const {name, phone, address, password } = registerDto;
+  //   await this.validateEmailUniqueness(name);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await this.userRepository.create({
-      name,
-      password: hashedPassword,
-      phone,
-      address,
-    });
-    const result = await this.userRepository.save(user);
-    const findUser = await this.userRepository.findOne({
-      where: {
-        id: result.id,
-      },
-    });
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+  //   const user = await this.userRepository.create({
+  //     name,
+  //     password: hashedPassword,
+  //     phone,
+  //     address,
+  //   });
+  //   const result = await this.userRepository.save(user);
+  //   const findUser = await this.userRepository.findOne({
+  //     where: {
+  //       id: result.id,
+  //     },
+  //   });
 
-    const payload = { id: findUser.id, name: findUser.name };
-    const token = this.jwtService.sign(payload);
+  //   const payload = { id: findUser.id, name: findUser.name };
+  //   const token = this.jwtService.sign(payload);
 
-    user.jwt_token = token;
-    await this.userRepository.save(user);
+  //   user.jwt_token = token;
+  //   await this.userRepository.save(user);
 
-    return { id: user.id, name, role: user.role, jwt_token: token };
-  }
+  //   return { id: user.id, name, role: user.role, jwt_token: token };
+  // }
 
   async login(loginDto: LoginDto): Promise<{
     id: string;
-    name: string;
+    username: string;
     role: string;
     jwt_token: string;
   }> {
-    const { name, password } = loginDto;
+    const { username, password } = loginDto;
 
     const user = await this.userRepository.findOne({
       where: {
-        name,
+        username,
       },
     });
 
@@ -71,7 +71,7 @@ export class AuthService {
       );
 
 
-    const payload = { id: user.id, name: user.name };
+    const payload = { id: user.id, username: user.username };
     const token = this.jwtService.sign(payload);
 
     user.jwt_token = token;
@@ -79,7 +79,7 @@ export class AuthService {
 
     return {
       id: user.id,
-      name: user.name,
+      username: user.username,
       role: user.role,
       jwt_token: token,
     };

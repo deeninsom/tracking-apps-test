@@ -24,6 +24,9 @@ export default class Users {
   name: string;
 
   @Column({ nullable: true })
+  username: string;
+
+  @Column({ nullable: true })
   password: string;
 
   @Column({ nullable: true })

@@ -20,6 +20,9 @@ export default class UserLocations {
   @Column({ type: 'double', nullable: true })
   lng: number;
 
+  @Column({ type: 'tinyint', default: false })
+  isActive: boolean;
+
   @ManyToOne(() => Users)
   @JoinColumn({ name: 'user_id' })
   user_id: Users;
