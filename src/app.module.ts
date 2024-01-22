@@ -53,9 +53,8 @@ import { SocketGateway } from './modules/socket/socket.service';
     UserModule,
     UserLocationModule,
     WorkLocationModule,
-    // SocketModule,
   ],
   controllers: [ImageController],
-  providers: [CloudinaryService, SocketGateway],
+  providers: [CloudinaryService],
 })
 export class AppModule {}
