@@ -12,7 +12,6 @@ import cloudinaryConfig from './modules/cloudinary/cloudinary.config';
 
 // entity
 import Users from './modules/user/user.entity';
-import { SocketModule } from './modules/socket/socket.module';
 import UserLocations from './modules/location-user/location-user.entity';
 import { UserLocationModule } from './modules/location-user/location-user.module';
 import WorkLocations from './modules/work-location/entity/work-location.entity';
