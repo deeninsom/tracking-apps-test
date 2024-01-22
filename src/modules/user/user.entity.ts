@@ -35,10 +35,10 @@ export default class Users {
   @Column({ type: 'simple-array', nullable: true })
   image_url: string[];
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double', nullable: true })
   lat: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double', nullable: true })
   lng: number;
 
   @Column({ nullable: true })
