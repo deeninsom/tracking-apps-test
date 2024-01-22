@@ -38,29 +38,39 @@
 // }
 import { SubscribeMessage, WebSocketGateway, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
+import * as chalk from 'chalk';
 
 
 @WebSocketGateway(3026, { cors: { origin: '*' } })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('SocketGateway');
+  private connectedClients: Set<string> = new Set();
 
-  afterInit(server: any) {
+  afterInit() {
     this.logger.log('WebSocket Gateway initialized');
   }
 
   handleConnection(client: any, ...args: any[]) {
-    this.logger.log(`Client connected: ${client.id}`);
-    let serverUrl = client.handshake.url;
-    serverUrl = serverUrl.replace(/^http/, 'ws');
-    this.logger.log(`WebSocket Server URL: ${serverUrl}`);
+    this.logger.log(chalk.yellowBright(`Client connected: ${client.id}`));
+    this.connectedClients.add(client.id);
+    this.logger.log(chalk.yellowBright(`Total Connected Clients: ${this.connectedClients.size}`));
   }
 
   handleDisconnect(client: any) {
-    this.logger.log(`Client disconnected: ${client.id}`);
+    this.logger.log(chalk.red(`Client disconnected: ${client.id}`));
+    this.connectedClients.delete(client.id);
+    this.logger.log(chalk.red(`Total Connected Clients: ${this.connectedClients.size}`));
   }
 
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
+  @SubscribeMessage('users')
+  socketGetUsers(client: any, payload: any): string {
+    console.log(payload)
+    return 'Hello world!';
+  }
+
+  @SubscribeMessage('user-locations')
+  socketGetUserLocations(client: any, payload: any): string {
+    console.log(payload)
     return 'Hello world!';
   }
 }
