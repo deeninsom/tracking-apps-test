@@ -18,6 +18,7 @@ import { UserLocationModule } from './modules/location-user/location-user.module
 import WorkLocations from './modules/work-location/entity/work-location.entity';
 import WorkLocationLists from './modules/work-location/entity/work.location-list.entity';
 import { WorkLocationModule } from './modules/work-location/work-location.module';
+import { SocketGateway } from './modules/socket/socket.service';
 
 
 
@@ -53,9 +54,9 @@ import { WorkLocationModule } from './modules/work-location/work-location.module
     UserModule,
     UserLocationModule,
     WorkLocationModule,
-    SocketModule,
+    // SocketModule,
   ],
   controllers: [ImageController],
-  providers: [CloudinaryService],
+  providers: [CloudinaryService, SocketGateway],
 })
 export class AppModule {}

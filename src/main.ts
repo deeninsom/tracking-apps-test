@@ -8,20 +8,15 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 // import * as cors from 'cors'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
+  const app = await NestFactory.create(AppModule, {cors: true});
+  app.enableCors({
+    origin: '*',
+    credentials: true
+  })
+  
   // socket
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  app.enableCors({
-    allowedHeaders: '*',
-    origin: '*',
-  });
-
-  // middleware
-  // app.use(cors({
-  //   origin: ['*']
-  // }))
   app.use(express.json());
   app.setGlobalPrefix('/api/v1/');
   app.use('/files', express.static(join(__dirname, '..', 'files')));
@@ -81,9 +76,10 @@ async function bootstrap() {
 
 //   // socket
 //   app.useWebSocketAdapter(new IoAdapter(app))
-//   await app.listen(8081, () => {
-//     console.log('WebSocket server is running on http://localhost:8081');
-//   });
+//   app.listen(3027)
+//   // await app.listen(8081, () => {
+//   //   console.log('WebSocket server is running on http://localhost:8081');
+//   // });
 // }
 
 bootstrap();
