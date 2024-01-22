@@ -16,7 +16,7 @@ export default class WorkLocations {
   @Column()
   label: string;
 
-  @Column({ type: 'bool', default: false })
+  @Column({ type: 'tinyint', default: false })
   isActive: boolean
 
   @OneToMany(() => WorkLocationLists, (location) => location.location_id, {
