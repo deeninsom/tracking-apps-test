@@ -31,14 +31,22 @@ export class WorkLocationController {
   @Get()
   async get(@Query() query: QueryWorkLocationDTO, @Res() res: Response) {
     try {
-      const data = await this.workLocationService.get(
+      const {
+        data,
+        page: currentPage,
+        totalPages,
+        totalRows,
+      } = await this.workLocationService.get(
         query.page,
         query.limit
       );
       return res.status(200).json({
         status: true,
-        message: 'Berhasil menampilkan lokasi',
-        data,
+        message: 'Berhasil menampilkan lokasi kerja',
+        page: currentPage,
+        totalPages,
+        totalRows,
+        data
       });
     } catch (error) {
       if (error instanceof HttpException) {
