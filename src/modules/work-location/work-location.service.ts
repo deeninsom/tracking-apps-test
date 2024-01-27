@@ -15,25 +15,42 @@ export class WorkLocationService {
   ) { }
 
   async get(page: number, limit: number) {
-    if (page <= 0) {
-      page = 1;
+    const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
+    queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
+    let dataQuery = queryBuilder;
+    if (limit && page) {
+      const skip = (page - 1) * limit;
+      dataQuery = dataQuery.take(limit).skip(skip);
     }
-
-    const skip = (page - 1) * limit;
-    const [data, total] = await this.workLocationsRepository.findAndCount({
-      take: limit,
-      skip
-    });
-
-    const totalPages = Math.ceil(total / limit);
-
+    const [data, total] = await dataQuery.getManyAndCount();
+    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
     return {
       data: data || [],
-      page,
+      page: limit && page ? page : undefined,
       totalPages,
       totalRows: total,
     };
   }
+  // async get(page: number, limit: number) {
+  //   if (page <= 0) {
+  //     page = 1;
+  //   }
+
+  //   const skip = (page - 1) * limit;
+  //   const [data, total] = await this.workLocationsRepository.findAndCount({
+  //     take: limit,
+  //     skip
+  //   });
+
+  //   const totalPages = Math.ceil(total / limit);
+
+  //   return {
+  //     data: data || [],
+  //     page,
+  //     totalPages,
+  //     totalRows: total,
+  //   };
+  // }
 
   async getId(id: string): Promise<WorkLocations> {
     const userLocation = await this.workLocationsRepository.findOne({
@@ -52,7 +69,7 @@ export class WorkLocationService {
     const location = this.workLocationsRepository.create(payload);
     console.log(location);
 
-    const createdLocation : any= await this.workLocationsRepository.save(location);
+    const createdLocation: any = await this.workLocationsRepository.save(location);
 
     const { location: locations } = payload;
 
@@ -61,7 +78,7 @@ export class WorkLocationService {
         this.workLocationListRepository.create({
           lat: loc.lat,
           lng: loc.lng,
-          location_id: createdLocation.id, 
+          location_id: createdLocation.id,
         }),
       );
 
