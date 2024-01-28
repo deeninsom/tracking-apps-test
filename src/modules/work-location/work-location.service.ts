@@ -31,38 +31,22 @@ export class WorkLocationService {
       totalRows: total,
     };
   }
-  // async get(page: number, limit: number) {
-  //   if (page <= 0) {
-  //     page = 1;
-  //   }
 
-  //   const skip = (page - 1) * limit;
-  //   const [data, total] = await this.workLocationsRepository.findAndCount({
-  //     take: limit,
-  //     skip
-  //   });
-
-  //   const totalPages = Math.ceil(total / limit);
-
-  //   return {
-  //     data: data || [],
-  //     page,
-  //     totalPages,
-  //     totalRows: total,
-  //   };
-  // }
-
-  async getId(id: string): Promise<WorkLocations> {
-    const userLocation = await this.workLocationsRepository.findOne({
-      where: { id },
-    });
-    if (!userLocation)
+  async getId(id: string): Promise<any> {
+    const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
+    queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
+    queryBuilder.where('work.id = :id', { id });
+  
+    const workLocation = await queryBuilder.getOne();
+  
+    if (!workLocation) {
       throw new HttpException(
-        `Lokasi dengan id ${id} tidak ditemukan !`,
+        `Lokasi dengan id ${id} tidak ditemukan!`,
         HttpStatus.NOT_FOUND,
       );
-
-    return userLocation;
+    }
+  
+    return workLocation;
   }
 
   async create(payload: any): Promise<WorkLocations[]> {
