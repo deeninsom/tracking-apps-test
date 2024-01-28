@@ -41,7 +41,7 @@ import { Logger } from '@nestjs/common';
 import * as chalk from 'chalk';
 
 
-@WebSocketGateway(3026, { cors: { origin: '*' } })
+@WebSocketGateway({ cors: { origin: '*' } })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('SocketGateway');
   private connectedClients: Set<string> = new Set();
