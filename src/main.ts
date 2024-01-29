@@ -11,12 +11,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: '*',
-    credentials: true
+    credentials: true,
+    allowedHeaders: '*',
   })
-  
-  // socket
-  app.useWebSocketAdapter(new IoAdapter(app));
 
+  // socket
+  app.useWebSocketAdapter(new IoAdapter(app))
   app.use(express.json());
   app.setGlobalPrefix('/api/v1/');
   app.use('/files', express.static(join(__dirname, '..', 'files')));

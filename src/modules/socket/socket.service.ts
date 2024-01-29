@@ -1,17 +1,15 @@
-import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import * as chalk from 'chalk';
 
 @WebSocketGateway({
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    transports: ['websocket', 'polling'],
-    credentials: true
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['*'],
+    credentials: true,
   },
-  namespace: "/api/socket",
-  transports: ['websocket']
 })
 export class SocketGateway implements OnGatewayConnection {
   @WebSocketServer() server: Server;
