@@ -109,7 +109,6 @@ export class WorkLocationService {
       await this.workLocationListRepository.delete(list.id);
     }));
 
-    // Delete the main entity
     await this.workLocationsRepository.delete(id);
   }
 }
