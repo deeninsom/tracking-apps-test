@@ -4,7 +4,12 @@ import { Logger } from '@nestjs/common';
 import * as chalk from 'chalk';
 
 
-@WebSocketGateway({ cors: true, namespace: "/api/socket" })
+@WebSocketGateway({ cors: {
+  origin: "*",
+  methods: ["GET", "POST"],
+  transports: ['websocket', 'polling'],
+  credentials: true
+}, namespace: "/api/socket" })
 export class SocketGateway {
   @WebSocketServer() server: Server;
   private userLocations: Record<string, any> = {};
@@ -13,20 +18,17 @@ export class SocketGateway {
   handleConnection(client: Socket) {
     this.logger.log(chalk.yellowBright(`Socket is connected: ${client.id}`));
 
-    client.on('user-locations', (location: any) => {
-      console.log(`Received user-locations from client ${client.id}:`, location);
-
-      // You can handle the received location data here
-      // For example, log it to the console or perform any other action
-    });
+    // client.on('send-locations', (data: any) => {
+    //   this.server.emit('received-locations', {data});
+    // });
 
   }
 
-  @SubscribeMessage('user-locations')
-  socketGetUsers(client: any, payload: any): string {
-    console.log(payload)
-    return 'Hello world!';
-  }
+  // @SubscribeMessage('message')
+  // socketGetUsers(client: any, payload: any): string {
+  //   console.log(payload)
+  //   return 'Hello world!';
+  // }
 
   // handleConnection(client: Socket): void {
   //   console.log('A user connected');

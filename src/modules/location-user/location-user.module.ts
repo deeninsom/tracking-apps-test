@@ -7,6 +7,7 @@ import UserLocations from './location-user.entity';
 import { UserLocationService } from './location-user.service';
 import { UserLocationController } from './location-user.controller';
 import Users from '../user/user.entity';
+import { SocketGateway } from '../socket/socket.service';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import Users from '../user/user.entity';
     }),
   ],
   controllers: [UserLocationController],
-  providers: [UserLocationService],
+  providers: [UserLocationService, SocketGateway],
 })
 export class UserLocationModule {}

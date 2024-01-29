@@ -2,12 +2,15 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
+import { SocketGateway } from '../socket/socket.service';
 
 @Injectable()
 export class UserLocationService {
   constructor(
     @InjectRepository(UserLocations)
     private locationUserRepository: Repository<UserLocations>,
+
+    private readonly socketGateway: SocketGateway,
   ) { }
 
   async get(userId: string, year: any, month: any, day: any, page: number, limit: number) {
@@ -56,6 +59,9 @@ export class UserLocationService {
     const createdUserLocation = await this.locationUserRepository.save(
       userLocation,
     );
+
+    this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
+
     return createdUserLocation;
   }
 
