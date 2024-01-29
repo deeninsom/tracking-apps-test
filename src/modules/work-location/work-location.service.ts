@@ -36,16 +36,16 @@ export class WorkLocationService {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
     queryBuilder.where('work.id = :id', { id });
-  
+
     const workLocation = await queryBuilder.getOne();
-  
+
     if (!workLocation) {
       throw new HttpException(
         `Lokasi dengan id ${id} tidak ditemukan!`,
         HttpStatus.NOT_FOUND,
       );
     }
-  
+
     return workLocation;
   }
 
@@ -94,7 +94,9 @@ export class WorkLocationService {
   async delete(id: string): Promise<void> {
     const location = await this.workLocationsRepository.findOne({
       where: { id },
+      relations: ['location_list']
     });
+
 
     if (!location)
       throw new HttpException(
@@ -102,6 +104,12 @@ export class WorkLocationService {
         HttpStatus.NOT_FOUND,
       );
 
+    await Promise.all(location.location_list.map(async (list) => {
+      console.log(list)
+      await this.workLocationListRepository.delete(list.id);
+    }));
+
+    // Delete the main entity
     await this.workLocationsRepository.delete(id);
   }
 }

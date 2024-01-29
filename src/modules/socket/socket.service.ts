@@ -1,4 +1,4 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import * as chalk from 'chalk';
@@ -12,17 +12,22 @@ export class SocketGateway {
 
   handleConnection(client: Socket) {
     this.logger.log(chalk.yellowBright(`Socket is connected: ${client.id}`));
-    client.on('users', () => {
-      this.server.emit('hai')
-    })
 
-    client.on('user-locations', () => {
-      console.log(`location use user ${client.id}`)
-    })
+    client.on('user-locations', (location: any) => {
+      console.log(`Received user-locations from client ${client.id}:`, location);
+
+      // You can handle the received location data here
+      // For example, log it to the console or perform any other action
+    });
+
   }
 
+  @SubscribeMessage('user-locations')
+  socketGetUsers(client: any, payload: any): string {
+    console.log(payload)
+    return 'Hello world!';
+  }
 
-  
   // handleConnection(client: Socket): void {
   //   console.log('A user connected');
 
