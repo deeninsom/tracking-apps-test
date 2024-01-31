@@ -38,11 +38,11 @@ export default class Users {
   @Column({ type: 'simple-array', nullable: true })
   image_url: string[];
 
-  @Column({ type: 'double', nullable: true })
-  lat: number;
+  @Column()
+  lat: string;
 
-  @Column({ type: 'double', nullable: true })
-  lng: number;
+  @Column()
+  lng: string;
 
   @Column({ nullable: true })
   jwt_token: string;

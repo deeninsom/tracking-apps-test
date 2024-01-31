@@ -18,10 +18,10 @@ export class CreateUserDto {
   phone: string;
 
   @ApiProperty()
-  lat: number;
+  lat: string;
 
   @ApiProperty()
-  lng: number;
+  lng: string;
 
   @ApiProperty()
   image_url: string[];
@@ -49,11 +49,11 @@ export class UpdateUserDto {
 
   @ApiProperty()
   @IsOptional()
-  lat?: number;
+  lat?: string;
 
   @ApiProperty()
   @IsOptional()
-  lng?: number;
+  lng?: string;
 
   @ApiProperty()
   @IsOptional()

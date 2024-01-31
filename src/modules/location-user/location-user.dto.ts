@@ -4,10 +4,10 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateUserLocationDTO {
   @ApiProperty()
-  lat: number;
+  lat: string;
 
   @ApiProperty()
-  lng: number;
+  lng: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -17,11 +17,11 @@ export class CreateUserLocationDTO {
 export class UpdateUserLocationDTO {
   @ApiProperty()
   @IsOptional()
-  lat: number;
+  lat: string;
 
   @ApiProperty()
   @IsOptional()
-  lng: number;
+  lng: string;
 }
 
 export class QueryUserLocationDTO {

@@ -14,11 +14,11 @@ export default class UserLocations {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'double', nullable: true })
-  lat: number;
+  @Column()
+  lat: string;
 
-  @Column({ type: 'double', nullable: true })
-  lng: number;
+  @Column()
+  lng: string;
 
   @Column({ type: 'tinyint', default: false })
   isActive: boolean;

@@ -34,10 +34,11 @@ export class WorkLocationService {
 
   async getId(id: string): Promise<any> {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
-    queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
+    queryBuilder.leftJoinAndSelect('work.location_list', 'location_list')
     queryBuilder.where('work.id = :id', { id });
 
     const workLocation = await queryBuilder.getOne();
+    console.log(workLocation)
 
     if (!workLocation) {
       throw new HttpException(

@@ -10,6 +10,8 @@ import * as chalk from 'chalk';
     allowedHeaders: ['*'],
     credentials: true,
   },
+  transports: ['polling','websocket'],
+  allowEIO3: true
 })
 export class SocketGateway implements OnGatewayConnection {
   @WebSocketServer() server: Server;

@@ -6,12 +6,10 @@ import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsObject, ValidateNested } fr
 
 class Location {
   @ApiProperty()
-  @IsNumber()
-  lat: number;
+  lat: string;
 
   @ApiProperty()
-  @IsNumber()
-  lng: number;
+  lng: string;
 }
 
 export class CreateWorkLocationDTO {
@@ -26,7 +24,7 @@ export class CreateWorkLocationDTO {
   @ApiProperty({
     description: 'Array of objects containing latitude (lat) and longitude (lng)',
     type: [Location],
-    example: [{ lat: 40.7128, lng: -74.0060 }]
+    example: [{ lat: "40.7128", lng: "-74.0060" }]
   })
   @IsArray()
   @ValidateNested({ each: true })
@@ -34,7 +32,6 @@ export class CreateWorkLocationDTO {
   location: Location[];
 }
 export class UpdateWorkLocationDTO {
-
   @ApiProperty()
   @IsOptional()
   label?: string;
