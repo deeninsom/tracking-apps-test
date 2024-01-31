@@ -6,10 +6,12 @@ import {
   UpdateDateColumn,
   JoinColumn,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import Users from '../user/user.entity';
 
 @Entity()
+@Index('idx_user_id', ['user_id'])
 export default class UserLocations {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -20,16 +20,26 @@ export class UserLocationService {
     if (year) queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', { created_at: year });
     if (month) queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', { created_at: month });
     if (day) queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', { created_at: day });
-    if (userId) queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
-  
+    if (userId) {
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
+      queryBuilder.andWhere('lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations)')
+    }
+
     let dataQuery = queryBuilder;
-  
+    
     if (limit && page) {
       const skip = (page - 1) * limit;
       dataQuery = dataQuery.take(limit).skip(skip);
     }
-  
+    
     const [data, total] = await dataQuery.getManyAndCount();
+    
+    // const dataWithNumberLatLng = data.map(entry => ({
+    //   ...entry,
+    //   lat: parseFloat(entry.lat),
+    //   lng: parseFloat(entry.lng),
+    // }));
+  
     const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
   
     return {
@@ -64,6 +74,25 @@ export class UserLocationService {
 
     return createdUserLocation;
   }
+
+  // async create(payload: any): Promise<UserLocations[]> {
+  //   const createdLocations: UserLocations[] = [];
+  
+  //   for (let i = 1; i <= 200000; i++) {
+  //     const userLocation = this.locationUserRepository.create(payload);
+  //     const createdUserLocation : any= await this.locationUserRepository.save(userLocation);
+      
+  //     // Mengumpulkan semua lokasi yang dibuat
+  //     createdLocations.push(createdUserLocation);
+      
+  //     // Mengirimkan informasi ke socket setiap kali membuat lokasi
+  //     this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
+  //   }
+  
+  //   // Mengembalikan array semua lokasi yang dibuat
+  //   return createdLocations;
+  // }
+  
 
   async update(id: string, payload: any): Promise<UserLocations> {
     const userLocation = await this.locationUserRepository.findOne({
