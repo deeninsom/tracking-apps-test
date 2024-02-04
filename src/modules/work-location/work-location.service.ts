@@ -17,6 +17,7 @@ export class WorkLocationService {
   async get(page: number, limit: number) {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
+    queryBuilder.addOrderBy('location_list.created_at', 'ASC');
     let dataQuery = queryBuilder;
     if (limit && page) {
       const skip = (page - 1) * limit;
@@ -38,7 +39,6 @@ export class WorkLocationService {
     queryBuilder.where('work.id = :id', { id });
 
     const workLocation = await queryBuilder.getOne();
-    console.log(workLocation)
 
     if (!workLocation) {
       throw new HttpException(
@@ -51,12 +51,19 @@ export class WorkLocationService {
   }
 
   async create(payload: any): Promise<WorkLocations[]> {
+    if (payload.location.length <= 0) {
+      throw new HttpException(
+        `Data list lokasi belum ada`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const location = this.workLocationsRepository.create(payload);
-    console.log(location);
 
     const createdLocation: any = await this.workLocationsRepository.save(location);
 
     const { location: locations } = payload;
+
 
     if (locations && locations.length > 0) {
       const locationListEntities = locations.map((loc: any) =>
@@ -106,7 +113,6 @@ export class WorkLocationService {
       );
 
     await Promise.all(location.location_list.map(async (list) => {
-      console.log(list)
       await this.workLocationListRepository.delete(list.id);
     }));
 

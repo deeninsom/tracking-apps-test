@@ -9,6 +9,10 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  username: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
   password: string;
 
   @ApiProperty()
@@ -34,6 +38,10 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsOptional()
   name?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  username: string;
 
   @ApiProperty()
   @IsOptional()

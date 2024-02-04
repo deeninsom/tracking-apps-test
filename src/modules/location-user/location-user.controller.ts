@@ -18,6 +18,7 @@ import { UserLocationService } from './location-user.service';
 import {
   CreateUserLocationDTO,
   QueryUserLocationDTO,
+  QueryUserLocationOnMobileDTO,
   UpdateUserLocationDTO,
 } from './location-user.dto';
 
@@ -41,6 +42,7 @@ export class UserLocationController {
         query.year,
         query.month,
         query.date,
+        query.sort,
         query.page,
         query.limit
       );
@@ -50,6 +52,34 @@ export class UserLocationController {
         page: currentPage,
         totalPages,
         totalRows,
+        data,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res
+          .status(error.getStatus())
+          .json({ status: false, message: error.message });
+      } else {
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
+      }
+    }
+  }
+
+  @Get('sort-today')
+  async getForMobile(@Query() query: QueryUserLocationOnMobileDTO, @Res() res: Response) {
+    try {
+      const {
+        data
+      } = await this.userLocationService.getForMobile(
+        query.user,
+      );
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menampilkan lokasi user terkini',
         data,
       });
     } catch (error) {
@@ -90,6 +120,7 @@ export class UserLocationController {
       }
     }
   }
+
 
   @Post()
   async create(@Body() payload: CreateUserLocationDTO, @Res() res: Response) {

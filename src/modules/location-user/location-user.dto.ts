@@ -1,6 +1,6 @@
 import { IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class CreateUserLocationDTO {
   @ApiProperty()
@@ -54,6 +54,14 @@ export class QueryUserLocationDTO {
   date?: string;
 
   @ApiProperty({
+    description: 'sort by date now',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  sort?: boolean;
+
+  @ApiProperty({
     description: 'get page',
     required: false,
   })
@@ -67,4 +75,13 @@ export class QueryUserLocationDTO {
   @IsOptional()
   limit?: number;
 
+}
+
+export class QueryUserLocationOnMobileDTO {
+  @ApiProperty({
+    description: 'find By user_id',
+    required: false,
+  })
+  @IsOptional()
+  user?: string;
 }
