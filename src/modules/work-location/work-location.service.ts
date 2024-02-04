@@ -37,6 +37,7 @@ export class WorkLocationService {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list')
     queryBuilder.where('work.id = :id', { id });
+    queryBuilder.addOrderBy('location_list.created_at', 'ASC');
 
     const workLocation = await queryBuilder.getOne();
 
