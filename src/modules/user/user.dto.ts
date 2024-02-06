@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional } from "class-validator";
 import { Role } from "./user.entity";
 
 export class CreateUserDto {
@@ -87,4 +87,11 @@ export class QueryUserDTO {
   @IsOptional()
   limit?: number;
 
+  @ApiProperty({
+    description: 'get user by role',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 }

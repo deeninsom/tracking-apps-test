@@ -35,7 +35,7 @@ export class UsersController {
         page: currentPage,
         totalPages,
         totalRows,
-      } = await this.userService.get(query.page, query.limit);
+      } = await this.userService.get(query.role, query.page, query.limit);
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan user',

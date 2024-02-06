@@ -11,8 +11,11 @@ export class UsersService {
     private userRepository: Repository<Users>,
   ) { }
 
-  async get(page: number, limit: number) {
+  async get(userRole: string, page: number, limit: number) {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if(userRole) queryBuilder.andWhere('user.role  LIKE :role', { role: userRole })
+    
     let dataQuery = queryBuilder;
     if (limit && page) {
       const skip = (page - 1) * limit;
