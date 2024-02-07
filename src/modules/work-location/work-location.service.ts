@@ -17,14 +17,25 @@ export class WorkLocationService {
   async get(page: number, limit: number) {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
-    queryBuilder.addOrderBy('location_list.created_at', 'ASC');
+  
+    // Subquery untuk mendapatkan ID entri yang diurutkan berdasarkan 'created_at'
+    const subQuery = this.workLocationListRepository
+      .createQueryBuilder('location_list_sub')
+      .select('location_list_sub.id')
+      .orderBy('location_list_sub.created_at', 'ASC');
+  
+    // Gabungkan subquery sebagai kondisi where
+    queryBuilder.andWhere('location_list.id IN (' + subQuery.getQuery() + ')');
+  
     let dataQuery = queryBuilder;
     if (limit && page) {
       const skip = (page - 1) * limit;
       dataQuery = dataQuery.take(limit).skip(skip);
     }
+  
     const [data, total] = await dataQuery.getManyAndCount();
     const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+  
     return {
       data: data || [],
       page: limit && page ? page : undefined,
@@ -32,6 +43,7 @@ export class WorkLocationService {
       totalRows: total,
     };
   }
+  
 
   async getId(id: string): Promise<any> {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
