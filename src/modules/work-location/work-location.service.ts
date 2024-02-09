@@ -79,15 +79,22 @@ export class WorkLocationService {
 
 
     if (locations && locations.length > 0) {
-      const locationListEntities = locations.map((loc: any) =>
-        this.workLocationListRepository.create({
-          lat: loc.lat,
-          lng: loc.lng,
-          location_id: createdLocation.id,
-        }),
-      );
+      const locationList = locations.map(val => {return {lat: val.lat, lng: val.lng, location_id: createdLocation.id})
+                                                 
+      // const locationListEntities = locations.map((loc: any) =>
+      //   this.workLocationListRepository.create({
+      //     lat: loc.lat,
+      //     lng: loc.lng,
+      //     location_id: createdLocation.id,
+      //   }),
+      // );
 
-      await this.workLocationListRepository.save(locationListEntities);
+      await this.workLocationListRepository
+        .createQueryBuilder()
+        .insert()
+        .into(WorkLocationLists)
+        .values(locationList)
+        .execute()
     }
 
     return createdLocation;
