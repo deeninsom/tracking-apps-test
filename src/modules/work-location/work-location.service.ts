@@ -79,7 +79,7 @@ export class WorkLocationService {
 
 
     if (locations && locations.length > 0) {
-      const locationList = locations.map(val => {return {lat: val.lat, lng: val.lng, location_id: createdLocation.id})
+      const locationList = locations.map((val:any) => {return {lat: val.lat, lng: val.lng, location_id: createdLocation.id}})
                                                  
       // const locationListEntities = locations.map((loc: any) =>
       //   this.workLocationListRepository.create({
