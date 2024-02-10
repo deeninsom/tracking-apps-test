@@ -6,6 +6,9 @@ import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsObject, ValidateNested } fr
 
 class Location {
   @ApiProperty()
+  list_number: number;
+
+  @ApiProperty()
   lat: string;
 
   @ApiProperty()

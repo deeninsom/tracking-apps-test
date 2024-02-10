@@ -17,25 +17,19 @@ export class WorkLocationService {
   async get(page: number, limit: number) {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list');
-  
-    // Subquery untuk mendapatkan ID entri yang diurutkan berdasarkan 'created_at'
-    const subQuery = this.workLocationListRepository
-      .createQueryBuilder('location_list_sub')
-      .select('location_list_sub.id')
-      .orderBy('location_list_sub.created_at', 'ASC');
-  
-    // Gabungkan subquery sebagai kondisi where
-    queryBuilder.andWhere('location_list.id IN (' + subQuery.getQuery() + ')');
-  
+    queryBuilder.orderBy('location_list.list_number', 'ASC');
+    queryBuilder.addOrderBy('work.created_at', 'DESC');
+
     let dataQuery = queryBuilder;
+    
     if (limit && page) {
       const skip = (page - 1) * limit;
-      dataQuery = dataQuery.take(limit).skip(skip);
+      dataQuery = queryBuilder.take(limit).skip(skip);
     }
-  
-    const [data, total] = await dataQuery.getManyAndCount();
+
+    const [data, total] :any = await dataQuery.getManyAndCount();
     const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
-  
+
     return {
       data: data || [],
       page: limit && page ? page : undefined,
@@ -43,13 +37,17 @@ export class WorkLocationService {
       totalRows: total,
     };
   }
-  
+
+
+
+
+
 
   async getId(id: string): Promise<any> {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list')
     queryBuilder.where('work.id = :id', { id });
-    queryBuilder.addOrderBy('location_list.created_at', 'ASC');
+    queryBuilder.addOrderBy('location_list.list_number', 'ASC');
 
     const workLocation = await queryBuilder.getOne();
 
@@ -79,9 +77,9 @@ export class WorkLocationService {
 
 
     if (locations && locations.length > 0) {
-      const locationList = locations.map((val:any) => {return {lat: val.lat, lng: val.lng, location_id: createdLocation.id}})
-                                                 
-      // const locationListEntities = locations.map((loc: any) =>
+      const locationList = locations.map((val: any) => { return { lat: val.lat, lng: val.lng, list_number: val.list_number, location_id: createdLocation.id } })
+
+      // const locationListEntities = locations.map(async(loc: any) =>
       //   this.workLocationListRepository.create({
       //     lat: loc.lat,
       //     lng: loc.lng,
@@ -95,6 +93,7 @@ export class WorkLocationService {
         .into(WorkLocationLists)
         .values(locationList)
         .execute()
+      // await this.workLocationListRepository.save(locationListEntities)
     }
 
     return createdLocation;

@@ -24,9 +24,12 @@ export default class WorkLocationLists {
   @Column()
   lng: string;
 
-  @CreateDateColumn()
+  @Column()
+  list_number: number;
+
+  @CreateDateColumn( {type: 'timestamp' })
   public created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({type: 'timestamp' })
   public updated_at: Date;
 }
