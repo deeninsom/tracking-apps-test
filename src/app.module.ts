@@ -20,6 +20,7 @@ import { WorkLocationModule } from './modules/work-location/work-location.module
 import { SocketGateway } from './modules/socket/socket.service';
 import Tasks from './modules/task/task.entity';
 import { TaskModule } from './modules/task/task.module';
+import { AppController } from './base-api';
 
 
 
@@ -58,7 +59,7 @@ import { TaskModule } from './modules/task/task.module';
     WorkLocationModule,
     TaskModule
   ],
-  controllers: [ImageController],
+  controllers: [ImageController, AppController],
   providers: [CloudinaryService, SocketGateway],
 })
 export class AppModule {}
