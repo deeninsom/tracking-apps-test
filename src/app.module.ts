@@ -21,6 +21,7 @@ import { SocketGateway } from './modules/socket/socket.service';
 import Tasks from './modules/task/task.entity';
 import { TaskModule } from './modules/task/task.module';
 import { AppController } from './base-api';
+import { GoogleApiModule } from './modules/google-api/google.module';
 
 
 
@@ -57,7 +58,8 @@ import { AppController } from './base-api';
     UserModule,
     UserLocationModule,
     WorkLocationModule,
-    TaskModule
+    TaskModule,
+    GoogleApiModule
   ],
   controllers: [ImageController, AppController],
   providers: [CloudinaryService, SocketGateway],
