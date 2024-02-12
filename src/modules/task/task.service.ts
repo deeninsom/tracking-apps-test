@@ -13,6 +13,18 @@ export class TaskService {
   async get(userId: string, page: number, limit: number) {
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
     queryBuilder.leftJoinAndSelect('task.user_id', 'user_id')
+    queryBuilder.leftJoinAndSelect('task.location_id', 'location_id')
+    queryBuilder.select([
+      'task.id',
+      'task.name',
+      'user_id.id',
+      'user_id.name',
+      'user_id.username',
+      'location_id.id',
+      'location_id.label',
+      'task.created_at',
+      'task.updated_at'
+  ]);
 
     if (userId) {
       queryBuilder.andWhere('task.user_id LIKE :user_id', { user_id: userId });
