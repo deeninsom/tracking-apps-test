@@ -8,10 +8,14 @@ import { UserLocationService } from './location-user.service';
 import { UserLocationController } from './location-user.controller';
 import Users from '../user/user.entity';
 import { SocketGateway } from '../socket/socket.service';
+import { TimerService } from '../timer/timer.service';
+import Timers from '../timer/timer.entity';
+import Tasks from '../task/task.entity';
+import WorkLocationLists from '../work-location/entity/work.location-list.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, UserLocations]),
+    TypeOrmModule.forFeature([Users, UserLocations, Timers, Tasks, WorkLocationLists]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: jwtConfigFactory,
@@ -19,6 +23,6 @@ import { SocketGateway } from '../socket/socket.service';
     }),
   ],
   controllers: [UserLocationController],
-  providers: [UserLocationService, SocketGateway],
+  providers: [UserLocationService, SocketGateway, TimerService],
 })
 export class UserLocationModule {}

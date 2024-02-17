@@ -22,6 +22,8 @@ import Tasks from './modules/task/task.entity';
 import { TaskModule } from './modules/task/task.module';
 import { AppController } from './base-api';
 import { GoogleApiModule } from './modules/google-api/google.module';
+import { TimerModule } from './modules/timer/timer.module';
+import Timers from './modules/timer/timer.entity';
 
 
 
@@ -50,7 +52,8 @@ import { GoogleApiModule } from './modules/google-api/google.module';
         UserLocations,
         WorkLocations,
         WorkLocationLists,
-        Tasks
+        Tasks,
+        Timers
       ],
     }),
 
@@ -59,7 +62,8 @@ import { GoogleApiModule } from './modules/google-api/google.module';
     UserLocationModule,
     WorkLocationModule,
     TaskModule,
-    GoogleApiModule
+    GoogleApiModule,
+    TimerModule
   ],
   controllers: [ImageController, AppController],
   providers: [CloudinaryService, SocketGateway],

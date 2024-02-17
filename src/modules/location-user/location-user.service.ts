@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
+import { TimerService } from '../timer/timer.service';
 
 @Injectable()
 export class UserLocationService {
@@ -11,6 +12,7 @@ export class UserLocationService {
     private locationUserRepository: Repository<UserLocations>,
 
     private readonly socketGateway: SocketGateway,
+    private readonly timerService: TimerService
   ) { }
 
   async get(userId: string, year: any, month: any, day: any, sort: any, page: number, limit: number) {
@@ -80,16 +82,44 @@ export class UserLocationService {
     return userLocation;
   }
 
-  async create(payload: any): Promise<UserLocations[]> {
-    const userLocation = this.locationUserRepository.create(payload);
-    const createdUserLocation = await this.locationUserRepository.save(
-      userLocation,
-    );
-
-    this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
-
-    return createdUserLocation;
+  create(payload: any): Promise<UserLocations[]> {
+    return new Promise((resolve, reject) => {
+      // Menyimpan lokasi pengguna
+      const userLocation = this.locationUserRepository.create(payload);
+      this.locationUserRepository.save(userLocation)
+        .then((createdUserLocation: any) => {
+          // Menjalankan timerService setelah lokasi pengguna berhasil disimpan
+          return this.timerService.create(payload.lat, payload.lng, payload.user_id)
+            .then(() => {
+              // Emit pesan socket setelah lokasi pengguna berhasil disimpan
+              this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
+              resolve(createdUserLocation);
+            })
+            .catch((timerError) => {
+              console.error('Error occurred while creating timer:', timerError);
+              reject(timerError);
+            });
+        })
+        .catch((saveError) => {
+          console.error('Error occurred while saving user location:', saveError);
+          reject(saveError);
+        });
+    });
   }
+  
+
+  // async create(payload: any): Promise<UserLocations[]> {
+  //   const userLocation = this.locationUserRepository.create(payload);
+  //   const createdUserLocation = await this.locationUserRepository.save(
+  //     userLocation,
+  //   );
+
+  //   await this.timerService.create(payload.lat, payload.lng, payload.user_id)
+
+  //   this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
+
+  //   return createdUserLocation;
+  // }
 
   // async create(payload: any): Promise<UserLocations[]> {
   //   const createdLocations: UserLocations[] = [];
