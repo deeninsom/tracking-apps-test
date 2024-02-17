@@ -4,8 +4,8 @@ import { In, Like, Repository } from 'typeorm';
 import Timers from './timer.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
 import Tasks from '../task/task.entity';
-import { formateDateNow } from 'src/utils/format-date.utils';
-import { calculateDistance } from 'src/utils/calculateDistance.utils';
+import { formateDateNow } from '../../utils/format-date.utils';
+import { calculateDistance } from '../../utils/calculateDistance.utils';
 
 @Injectable()
 export class TimerService {
