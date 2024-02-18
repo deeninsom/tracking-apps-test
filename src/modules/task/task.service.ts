@@ -24,7 +24,7 @@ export class TaskService {
       'location_id.label',
       'task.created_at',
       'task.updated_at'
-  ]);
+    ]);
 
     if (userId) {
       queryBuilder.andWhere('task.user_id LIKE :user_id', { user_id: userId });
@@ -46,13 +46,26 @@ export class TaskService {
     };
   }
 
-  async getId(id: string): Promise<Tasks> {
-    const task = await this.taskRepository.findOne({
-      where: { id }
-    });
-    if (!task) throw new HttpException(`Task dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
+  async getId(id: string) {
+    const queryBuilder = this.taskRepository.createQueryBuilder('task');
+    queryBuilder.leftJoinAndSelect('task.user_id', 'user_id');
+    queryBuilder.leftJoinAndSelect('task.location_id', 'location_id');
+    queryBuilder.select([
+      'task.id',
+      'task.name',
+      'user_id.id',
+      'user_id.name',
+      'user_id.username',
+      'location_id.id',
+      'location_id.label',
+      'task.created_at',
+      'task.updated_at'
+    ]);
+    queryBuilder.andWhere('task.id = :id', { id: id });
 
-    return task;
+    const data = await queryBuilder.getOne();
+
+    return data || null
   }
 
   async create(payload: any): Promise<Tasks[]> {

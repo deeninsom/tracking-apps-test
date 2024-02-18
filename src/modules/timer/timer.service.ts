@@ -1,6 +1,6 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import Timers from './timer.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
 import Tasks from '../task/task.entity';
