@@ -19,6 +19,7 @@ import {
   CreateUserLocationDTO,
   QueryUserLocationDTO,
   QueryUserLocationOnMobileDTO,
+  QueryUserLocationV2DTO,
   UpdateUserLocationDTO,
 } from './location-user.dto';
 
@@ -27,7 +28,7 @@ import {
 // @UseGuards(AuthGuard)
 // @ApiBearerAuth('access-token')
 export class UserLocationController {
-  constructor(private readonly userLocationService: UserLocationService) { }
+  constructor(private readonly userLocationService: UserLocationService) {}
 
   @Get()
   async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
@@ -44,7 +45,7 @@ export class UserLocationController {
         query.date,
         query.sort,
         query.page,
-        query.limit
+        query.limit,
       );
       return res.status(200).json({
         status: true,
@@ -69,17 +70,30 @@ export class UserLocationController {
     }
   }
 
-  @Get('sort-today')
-  async getForMobile(@Query() query: QueryUserLocationOnMobileDTO, @Res() res: Response) {
+  @Get('v2')
+  async getLocationUsersV2(
+    @Query() query: QueryUserLocationV2DTO,
+    @Res() res: Response,
+  ) {
     try {
       const {
-        data
-      } = await this.userLocationService.getForMobile(
-        query.user,
+        data,
+        page: currentPage,
+        totalPages,
+        totalRows,
+      } = await this.userLocationService.getLocationUsersV2(
+        query.user_id,
+        query.date,
+        query.sort,
+        query.page,
+        query.limit,
       );
       return res.status(200).json({
         status: true,
-        message: 'Berhasil menampilkan lokasi user terkini',
+        message: 'Berhasil menampilkan lokasi user',
+        page: currentPage,
+        totalPages,
+        totalRows,
         data,
       });
     } catch (error) {
@@ -96,6 +110,33 @@ export class UserLocationController {
       }
     }
   }
+
+  // @Get('sort-today')
+  // async getForMobile(
+  //   @Query() query: QueryUserLocationOnMobileDTO,
+  //   @Res() res: Response,
+  // ) {
+  //   try {
+  //     const { data } = await this.userLocationService.getForMobile(query.user);
+  //     return res.status(200).json({
+  //       status: true,
+  //       message: 'Berhasil menampilkan lokasi user terkini',
+  //       data,
+  //     });
+  //   } catch (error) {
+  //     if (error instanceof HttpException) {
+  //       return res
+  //         .status(error.getStatus())
+  //         .json({ status: false, message: error.message });
+  //     } else {
+  //       return res.status(500).json({
+  //         status: false,
+  //         message: 'Terjadi kesalahan server !',
+  //         error: error.message,
+  //       });
+  //     }
+  //   }
+  // }
 
   @Get(':id')
   async getUserById(@Param('id') id: string, @Res() res: Response) {
@@ -120,7 +161,6 @@ export class UserLocationController {
       }
     }
   }
-
 
   @Post()
   async create(@Body() payload: CreateUserLocationDTO, @Res() res: Response) {
@@ -176,13 +216,11 @@ export class UserLocationController {
   async delete(@Param('id') id: string, @Res() res: Response) {
     try {
       await this.userLocationService.delete(id);
-      return res
-        .status(200)
-        .json({
-          status: true,
-          message: 'Berhasil menghapus lokasi user.',
-          data: {},
-        });
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menghapus lokasi user.',
+        data: {},
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         return res

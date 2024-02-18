@@ -12,23 +12,45 @@ export class UserLocationService {
     private locationUserRepository: Repository<UserLocations>,
 
     private readonly socketGateway: SocketGateway,
-    private readonly timerService: TimerService
-  ) { }
+    private readonly timerService: TimerService,
+  ) {}
 
-  async get(userId: string, year: any, month: any, day: any, sort: any, page: number, limit: number) {
-    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+  async get(
+    userId: string,
+    year: any,
+    month: any,
+    day: any,
+    sort: any,
+    page: number,
+    limit: number,
+  ) {
+    const queryBuilder =
+      this.locationUserRepository.createQueryBuilder('lokasi_user');
     queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
 
-    if (year) queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', { created_at: year });
-    if (month) queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', { created_at: month });
-    if (day) queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', { created_at: day });
+    if (year)
+      queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', {
+        created_at: year,
+      });
+    if (month)
+      queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', {
+        created_at: month,
+      });
+    if (day)
+      queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', {
+        created_at: day,
+      });
     if (userId) {
-      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
-      queryBuilder.andWhere('lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations)')
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+        user_id: userId,
+      });
+      queryBuilder.andWhere(
+        'lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations)',
+      );
     }
 
     if (sort == true) {
-      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()')
+      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
       queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
     }
 
@@ -51,23 +73,64 @@ export class UserLocationService {
     };
   }
 
-  async getForMobile(userId: string) {
-    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
-    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
-    
+  async getLocationUsersV2(
+    userId: string,
+    date: string,
+    sort: any,
+    page: number,
+    limit: number,
+  ) {
+    const queryBuilder =
+      this.locationUserRepository.createQueryBuilder('lokasi_user');
+
     if (userId) {
-      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
-      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()')
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+        user_id: userId,
+      });
+    }
+
+    if (date)
+      queryBuilder.andWhere('DATE(lokasi_user.created_at) = :date', { date });
+
+    if (sort) {
+      queryBuilder.orderBy('lokasi_user.created_at', sort);
+    }
+
+    if (page && limit) {
+      queryBuilder.skip((page - 1) * limit).take(limit);
+    }
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+
+    return {
+      data: data || [],
+      page: limit && page ? page : undefined,
+      totalPages,
+      totalRows: total,
+    };
+  }
+
+  async getForMobile(userId: string) {
+    const queryBuilder =
+      this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+
+    if (userId) {
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+        user_id: userId,
+      });
+      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
       queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
     }
 
     const [data] = await queryBuilder.getManyAndCount();
 
     return {
-      data: data || []
+      data: data || [],
     };
   }
-
 
   async getId(id: string): Promise<UserLocations> {
     const userLocation = await this.locationUserRepository.findOne({
@@ -86,13 +149,17 @@ export class UserLocationService {
     return new Promise((resolve, reject) => {
       // Menyimpan lokasi pengguna
       const userLocation = this.locationUserRepository.create(payload);
-      this.locationUserRepository.save(userLocation)
+      this.locationUserRepository
+        .save(userLocation)
         .then((createdUserLocation: any) => {
           // Menjalankan timerService setelah lokasi pengguna berhasil disimpan
-          return this.timerService.create(payload.lat, payload.lng, payload.user_id)
+          return this.timerService
+            .create(payload.lat, payload.lng, payload.user_id)
             .then(() => {
               // Emit pesan socket setelah lokasi pengguna berhasil disimpan
-              this.socketGateway.server.emit('received-locations', { data: createdUserLocation });
+              this.socketGateway.server.emit('received-locations', {
+                data: createdUserLocation,
+              });
               resolve(createdUserLocation);
             })
             .catch((timerError) => {
@@ -101,12 +168,14 @@ export class UserLocationService {
             });
         })
         .catch((saveError) => {
-          console.error('Error occurred while saving user location:', saveError);
+          console.error(
+            'Error occurred while saving user location:',
+            saveError,
+          );
           reject(saveError);
         });
     });
   }
-  
 
   // async create(payload: any): Promise<UserLocations[]> {
   //   const userLocation = this.locationUserRepository.create(payload);
@@ -138,7 +207,6 @@ export class UserLocationService {
   //   // Mengembalikan array semua lokasi yang dibuat
   //   return createdLocations;
   // }
-
 
   async update(id: string, payload: any): Promise<UserLocations> {
     const userLocation = await this.locationUserRepository.findOne({
