@@ -16,6 +16,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
 import { UserLocationService } from './location-user.service';
 import {
+  CreateLocationUserV2DTO,
   CreateUserLocationDTO,
   QueryUserLocationDTO,
   QueryUserLocationOnMobileDTO,
@@ -108,6 +109,29 @@ export class UserLocationController {
           error: error.message,
         });
       }
+    }
+  }
+
+  @Post('v2')
+  async createLocationUserV2(
+    @Body() body: CreateLocationUserV2DTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const { userId, lat, lng } = body;
+      const newLocationUser =
+        await this.userLocationService.createLocationUserV2(userId, lat, lng);
+      return res.status(201).json({
+        status: true,
+        message: 'Berhasil menambahkan lokasi user',
+        data: newLocationUser,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: 'Terjadi kesalahan server!',
+        error: error.message,
+      });
     }
   }
 

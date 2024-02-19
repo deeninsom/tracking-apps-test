@@ -22,8 +22,11 @@ export default class UserLocations {
   @Column()
   lng: string;
 
-  @Column({ type: 'tinyint', default: false })
+  @Column({ type: 'tinyint', default: true })
   isActive: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  location_json: string;
 
   @ManyToOne(() => Users)
   @JoinColumn({ name: 'user_id' })

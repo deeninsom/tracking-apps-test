@@ -1,6 +1,6 @@
 import { IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserLocationDTO {
   @ApiProperty()
@@ -116,6 +116,32 @@ export class QueryUserLocationV2DTO {
   })
   @IsOptional()
   limit?: number;
+}
+
+export class CreateLocationUserV2DTO {
+  @ApiProperty({
+    description: 'User ID',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  userId: string;
+
+  @ApiProperty({
+    description: 'Latitude',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  lat: string;
+
+  @ApiProperty({
+    description: 'Longitude',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  lng: string;
 }
 
 export class QueryUserLocationOnMobileDTO {

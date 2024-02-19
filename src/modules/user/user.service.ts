@@ -9,13 +9,14 @@ export class UsersService {
   constructor(
     @InjectRepository(Users)
     private userRepository: Repository<Users>,
-  ) { }
+  ) {}
 
   async get(userRole: string, page: number, limit: number) {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
 
-    if(userRole) queryBuilder.andWhere('user.role  LIKE :role', { role: userRole })
-    
+    if (userRole)
+      queryBuilder.andWhere('user.role  LIKE :role', { role: userRole });
+
     let dataQuery = queryBuilder;
     if (limit && page) {
       const skip = (page - 1) * limit;
@@ -33,9 +34,13 @@ export class UsersService {
 
   async getId(id: string): Promise<Users> {
     const user = await this.userRepository.findOne({
-      where: { id }
+      where: { id },
     });
-    if (!user) throw new HttpException(`User dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
+    if (!user)
+      throw new HttpException(
+        `User dengan id ${id} tidak ditemukan !`,
+        HttpStatus.NOT_FOUND,
+      );
 
     return user;
   }
@@ -52,7 +57,11 @@ export class UsersService {
   async update(id: string, payload: any): Promise<Users> {
     const user = await this.userRepository.findOne({ where: { id } });
 
-    if (!user) throw new HttpException(`User dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
+    if (!user)
+      throw new HttpException(
+        `User dengan id ${id} tidak ditemukan !`,
+        HttpStatus.NOT_FOUND,
+      );
 
     if (payload.password) {
       const hashedPassword = await bcrypt.hash(payload.password, 10);
@@ -68,7 +77,11 @@ export class UsersService {
   async delete(id: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { id } });
 
-    if (!user) throw new HttpException(`User dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
+    if (!user)
+      throw new HttpException(
+        `User dengan id ${id} tidak ditemukan !`,
+        HttpStatus.NOT_FOUND,
+      );
 
     await this.userRepository.delete(id);
   }

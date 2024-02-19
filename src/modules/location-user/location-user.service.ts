@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
+import axios from 'axios';
+import { getAddressComponents } from 'src/utils/getAddressComponents';
+import { interval } from 'rxjs';
 
 @Injectable()
 export class UserLocationService {
@@ -110,6 +113,45 @@ export class UserLocationService {
       totalPages,
       totalRows: total,
     };
+  }
+
+  async createLocationUserV2(
+    userId: any,
+    lat: string,
+    lng: string,
+  ): Promise<UserLocations> {
+    const locationUser = this.locationUserRepository.create({
+      user_id: userId,
+      lat,
+      lng,
+      isActive: true,
+    });
+    const currentMinute = new Date().getMinutes();
+
+    const existingLocationUser = await this.locationUserRepository
+      .createQueryBuilder('locationUser')
+      .where('locationUser.user_id = :userId', { userId })
+      .andWhere('DATE(locationUser.created_at) = CURRENT_DATE')
+      .getOne();
+
+    // 5 minutes interval for hitting the Google API
+    const isInterval = currentMinute % 5 === 0;
+    if (!isInterval && !existingLocationUser) {
+      const locationJson = await getAddressComponents(lat, lng);
+      locationUser.location_json = locationJson;
+      console.log('kondisi 1 di eksekusi');
+    }
+
+    if (isInterval) {
+      const locationJson = await getAddressComponents(lat, lng);
+      locationUser.location_json = locationJson;
+      console.log('kondisi 2 di eksekusi');
+    }
+
+    const newLocationUser = await this.locationUserRepository.save(
+      locationUser,
+    );
+    return newLocationUser;
   }
 
   async getForMobile(userId: string) {
