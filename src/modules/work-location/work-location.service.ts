@@ -38,11 +38,6 @@ export class WorkLocationService {
     };
   }
 
-
-
-
-
-
   async getId(id: string): Promise<any> {
     const queryBuilder = this.workLocationsRepository.createQueryBuilder('work');
     queryBuilder.leftJoinAndSelect('work.location_list', 'location_list')
@@ -79,21 +74,12 @@ export class WorkLocationService {
     if (locations && locations.length > 0) {
       const locationList = locations.map((val: any) => { return { lat: val.lat, lng: val.lng, list_number: val.list_number, location_id: createdLocation.id } })
 
-      // const locationListEntities = locations.map(async(loc: any) =>
-      //   this.workLocationListRepository.create({
-      //     lat: loc.lat,
-      //     lng: loc.lng,
-      //     location_id: createdLocation.id,
-      //   }),
-      // );
-
       await this.workLocationListRepository
         .createQueryBuilder()
         .insert()
         .into(WorkLocationLists)
         .values(locationList)
         .execute()
-      // await this.workLocationListRepository.save(locationListEntities)
     }
 
     return createdLocation;
@@ -130,10 +116,6 @@ export class WorkLocationService {
         `Lokasi dengan id ${id} tidak ditemukan !`,
         HttpStatus.NOT_FOUND,
       );
-
-    await Promise.all(location.location_list.map(async (list) => {
-      await this.workLocationListRepository.delete(list.id);
-    }));
 
     await this.workLocationsRepository.delete(id);
   }

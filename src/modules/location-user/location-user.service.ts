@@ -4,9 +4,7 @@ import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
-import axios from 'axios';
 import { getAddressComponents } from 'src/utils/getAddressComponents';
-import { interval } from 'rxjs';
 
 @Injectable()
 export class UserLocationService {
@@ -116,16 +114,16 @@ export class UserLocationService {
   }
 
   async createLocationUserV2(
-    userId: any,
+    userId: string,
     lat: string,
     lng: string,
-  ): Promise<UserLocations> {
-    const locationUser = this.locationUserRepository.create({
+  ): Promise<UserLocations[]> {
+    const locationUser: any = this.locationUserRepository.create({
       user_id: userId,
       lat,
       lng,
       isActive: true,
-    });
+    } as any);
     const currentMinute = new Date().getMinutes();
 
     const existingLocationUser = await this.locationUserRepository
@@ -151,6 +149,7 @@ export class UserLocationService {
     const newLocationUser = await this.locationUserRepository.save(
       locationUser,
     );
+
     return newLocationUser;
   }
 
@@ -189,16 +188,13 @@ export class UserLocationService {
 
   create(payload: any): Promise<UserLocations[]> {
     return new Promise((resolve, reject) => {
-      // Menyimpan lokasi pengguna
       const userLocation = this.locationUserRepository.create(payload);
       this.locationUserRepository
         .save(userLocation)
-        .then((createdUserLocation: any) => {
-          // Menjalankan timerService setelah lokasi pengguna berhasil disimpan
+        .then(async (createdUserLocation: any) => {
           return this.timerService
             .create(payload.lat, payload.lng, payload.user_id)
             .then(() => {
-              // Emit pesan socket setelah lokasi pengguna berhasil disimpan
               this.socketGateway.server.emit('received-locations', {
                 data: createdUserLocation,
               });

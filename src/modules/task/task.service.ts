@@ -1,35 +1,28 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import Tasks from './task.entity';
+import Tasks from './entity/task.entity';
+import GroupTaskUsers from './entity/groupTaskUser.entity';
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(Tasks)
     private taskRepository: Repository<Tasks>,
+
+    @InjectRepository(GroupTaskUsers)
+    private groupTaskUsersRepository: Repository<GroupTaskUsers>,
   ) { }
 
-  async get(userId: string, page: number, limit: number) {
+  async get(page: number, limit: number) {
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
-    queryBuilder.leftJoinAndSelect('task.user_id', 'user_id')
-    queryBuilder.leftJoinAndSelect('task.location_id', 'location_id')
+    queryBuilder.orderBy('task.created_at', 'DESC')
     queryBuilder.select([
       'task.id',
       'task.name',
-      'user_id.id',
-      'user_id.name',
-      'user_id.username',
-      'location_id.id',
-      'location_id.label',
       'task.created_at',
       'task.updated_at'
-  ]);
-
-    if (userId) {
-      queryBuilder.andWhere('task.user_id LIKE :user_id', { user_id: userId });
-      queryBuilder.addOrderBy('task.created_at', 'ASC');
-    }
+    ]);
 
     let dataQuery = queryBuilder;
     if (limit && page) {
@@ -46,18 +39,54 @@ export class TaskService {
     };
   }
 
-  async getId(id: string): Promise<Tasks> {
-    const task = await this.taskRepository.findOne({
-      where: { id }
-    });
-    if (!task) throw new HttpException(`Task dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
+  async getId(id: string) {
+    const queryBuilder = this.taskRepository.createQueryBuilder('task');
+    queryBuilder.leftJoinAndSelect('task.grouping', 'users')
+    queryBuilder.leftJoinAndSelect('task.location_id', 'location_id')
+    queryBuilder.leftJoinAndSelect('users.user_id', 'user_id')
+   
+    queryBuilder.select([
+      'task.id',
+      'task.name',
+      'users.created_at',
+      'users.updated_at',
+      'user_id.id',
+      'user_id.name',
+      'location_id.id',
+      'location_id.label',
+      'task.created_at',
+      'task.updated_at'
+    ]);
+    queryBuilder.andWhere('task.id = :id', { id: id });
 
-    return task;
+    const data = await queryBuilder.getOne();
+
+    return data || null
   }
 
   async create(payload: any): Promise<Tasks[]> {
+    if (payload.users.length <= 0) {
+      throw new HttpException(
+        `Data list users belum belum di isi`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const task = this.taskRepository.create(payload);
-    const createdTask = await this.taskRepository.save(task);
+    const createdTask: any = await this.taskRepository.save(task);
+
+    const { users: user } = payload
+
+    if (user && user.length > 0) {
+      const userList = user.map((val: any) => { return { user_id: val.user_id, task_id: createdTask.id } })
+      
+      await this.groupTaskUsersRepository
+        .createQueryBuilder()
+        .insert()
+        .values(userList)
+        .execute()
+    }
+
     return createdTask;
   }
 

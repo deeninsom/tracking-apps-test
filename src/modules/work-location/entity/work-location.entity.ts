@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import WorkLocationLists from './work.location-list.entity';
-import Tasks from 'src/modules/task/task.entity';
+import Tasks from 'src/modules/task/entity/task.entity';
 
 @Entity()
 export default class WorkLocations {
@@ -33,7 +33,6 @@ export default class WorkLocations {
     onUpdate: 'CASCADE',
   })
   tasks: Tasks[];
-
 
   @CreateDateColumn()
   public created_at: Date;

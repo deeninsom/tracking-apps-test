@@ -6,9 +6,10 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
-import Users from '../user/user.entity';
-import WorkLocations from '../work-location/entity/work-location.entity';
+import WorkLocations from '../../work-location/entity/work-location.entity';
+import GroupTaskUsers from './groupTaskUser.entity';
 
 @Entity()
 export default class Tasks {
@@ -18,13 +19,19 @@ export default class Tasks {
   @Column({ nullable: true })
   name: string;
 
-  @ManyToOne(() => Users)
-  @JoinColumn({ name: 'user_id' })
-  user_id: Users;
-
-  @ManyToOne(() => WorkLocations)
+  @ManyToOne(() => WorkLocations, {
+    onDelete: 'CASCADE',
+    onUpdate: "CASCADE"
+  })
   @JoinColumn({ name: 'location_id' })
   location_id: WorkLocations;
+
+  @OneToMany(() => GroupTaskUsers, (groupList) => groupList.task_id, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  grouping: GroupTaskUsers[];
 
   @CreateDateColumn()
   public created_at: Date;

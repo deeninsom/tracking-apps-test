@@ -10,12 +10,13 @@ import Users from '../user/user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
 import Timers from '../timer/timer.entity';
-import Tasks from '../task/task.entity';
+import Tasks from '../task/entity/task.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
+import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, UserLocations, Timers, Tasks, WorkLocationLists]),
+    TypeOrmModule.forFeature([Users, UserLocations, Timers, Tasks, GroupTaskUsers, WorkLocationLists]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: jwtConfigFactory,

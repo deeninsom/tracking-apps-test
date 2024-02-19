@@ -1,7 +1,7 @@
 import { IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsObject, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, ValidateNested } from 'class-validator';
 
 
 class Location {
@@ -9,10 +9,10 @@ class Location {
   list_number: number;
 
   @ApiProperty()
-  lat: string;
+  lat: number;
 
   @ApiProperty()
-  lng: string;
+  lng: number;
 }
 
 export class CreateWorkLocationDTO {
@@ -27,7 +27,7 @@ export class CreateWorkLocationDTO {
   @ApiProperty({
     description: 'Array of objects containing latitude (lat) and longitude (lng)',
     type: [Location],
-    example: [{ lat: "40.7128", lng: "-74.0060" }]
+    example: [{ lat: 40.7128, lng: -74.0060, list_number: 0 }]
   })
   @IsArray()
   @ValidateNested({ each: true })

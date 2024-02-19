@@ -4,10 +4,10 @@ import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserLocationDTO {
   @ApiProperty()
-  lat: string;
+  lat: number;
 
   @ApiProperty()
-  lng: string;
+  lng: number;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -17,11 +17,11 @@ export class CreateUserLocationDTO {
 export class UpdateUserLocationDTO {
   @ApiProperty()
   @IsOptional()
-  lat: string;
+  lat: number;
 
   @ApiProperty()
   @IsOptional()
-  lng: string;
+  lng: number;
 }
 
 export class QueryUserLocationDTO {
