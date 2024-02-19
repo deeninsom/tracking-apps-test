@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 @Controller('/')
 export class AppController {
-  constructor() {}
+  // constructor() {}
 
   @Get()
   getHello(@Req() req: Request, @Res() res: Response) {

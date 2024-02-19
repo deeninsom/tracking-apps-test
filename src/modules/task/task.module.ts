@@ -12,7 +12,7 @@ import GroupTaskUsers from './entity/groupTaskUser.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Tasks, GroupTaskUsers, WorkLocations]),
+    TypeOrmModule.forFeature([Tasks, GroupTaskUsers, Users, WorkLocations]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: jwtConfigFactory,
