@@ -1,8 +1,8 @@
 export const calculateDistance = async (dataUser: any, dataLocation: any) => {
     const lat1 = dataUser.lat * Math.PI / 180;
     const lng1 = dataUser.lng * Math.PI / 180;
-    const lat2 = parseFloat(dataLocation.lat) * Math.PI / 180;
-    const lng2 = parseFloat(dataLocation.lng) * Math.PI / 180;
+    const lat2 = dataLocation.lat * Math.PI / 180;
+    const lng2 = dataLocation.lng * Math.PI / 180;
 
     const R = 6371e3;
 

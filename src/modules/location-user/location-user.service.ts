@@ -13,7 +13,7 @@ export class UserLocationService {
 
     private readonly socketGateway: SocketGateway,
     private readonly timerService: TimerService,
-  ) {}
+  ) { }
 
   async get(
     userId: string,
@@ -113,8 +113,7 @@ export class UserLocationService {
   }
 
   async getForMobile(userId: string) {
-    const queryBuilder =
-      this.locationUserRepository.createQueryBuilder('lokasi_user');
+    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
     queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
 
     if (userId) {
@@ -147,16 +146,13 @@ export class UserLocationService {
 
   create(payload: any): Promise<UserLocations[]> {
     return new Promise((resolve, reject) => {
-      // Menyimpan lokasi pengguna
       const userLocation = this.locationUserRepository.create(payload);
       this.locationUserRepository
         .save(userLocation)
-        .then((createdUserLocation: any) => {
-          // Menjalankan timerService setelah lokasi pengguna berhasil disimpan
+        .then(async (createdUserLocation: any) => {
           return this.timerService
             .create(payload.lat, payload.lng, payload.user_id)
             .then(() => {
-              // Emit pesan socket setelah lokasi pengguna berhasil disimpan
               this.socketGateway.server.emit('received-locations', {
                 data: createdUserLocation,
               });

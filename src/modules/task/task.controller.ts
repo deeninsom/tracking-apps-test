@@ -35,7 +35,7 @@ export class TasksController {
         page: currentPage,
         totalPages,
         totalRows,
-      } = await this.taskService.get(query.user_id, query.page, query.limit);
+      } = await this.taskService.get(query.page, query.limit);
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan task',

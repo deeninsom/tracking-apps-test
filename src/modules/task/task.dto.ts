@@ -1,5 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
+
+class GroupTaskUserDto {
+  @ApiProperty()
+  user_id: string;
+}
 
 export class CreateTaskDto {
   @ApiProperty()
@@ -8,11 +14,18 @@ export class CreateTaskDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  user_id: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
   location_id: string;
+
+  @ApiProperty({
+    description: 'Array of objects containing user id',
+    type: [GroupTaskUserDto],
+    example: [{ user_id: 'uuid' }]
+  })
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => GroupTaskUserDto)
+  users: GroupTaskUserDto[];
 }
 
 export class UpdateTaskDto {
@@ -22,7 +35,10 @@ export class UpdateTaskDto {
 
   @ApiProperty()
   @IsOptional()
-  user_id: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => GroupTaskUserDto)
+  users: GroupTaskUserDto[];
 
   @ApiProperty()
   @IsOptional()
@@ -43,12 +59,4 @@ export class QueryTaskDTO {
   })
   @IsOptional()
   limit?: number;
-
-  @ApiProperty({
-    description: 'Get by user id',
-    required: false,
-  })
-  @IsOptional()
-  user_id?: string;
-
 }

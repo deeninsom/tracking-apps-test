@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import Timers from './timer.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
-import Tasks from '../task/task.entity';
+import Tasks from '../task/entity/task.entity';
 import { formateDateNow } from '../../utils/format-date.utils';
 import { calculateDistance } from '../../utils/calculateDistance.utils';
+import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
 
 @Injectable()
 export class TimerService {
@@ -15,6 +16,9 @@ export class TimerService {
 
     @InjectRepository(Tasks)
     private taskRepository: Repository<Tasks>,
+
+    @InjectRepository(GroupTaskUsers)
+    private groupTaskRepository: Repository<GroupTaskUsers>,
 
     @InjectRepository(WorkLocationLists)
     private workLocationListRepository: Repository<WorkLocationLists>
@@ -66,37 +70,47 @@ export class TimerService {
   }
 
   async create(lat: any, lng: any, userId: any) {
-    const queryTask = this.taskRepository.createQueryBuilder('task');
-    queryTask.leftJoinAndSelect('task.location_id', 'location_id');
-    queryTask.select(['task.id', 'location_id.id']);
-    const tasks = await queryTask.getMany();
-    const locationIds = tasks.map((task) => task.location_id.id);
 
-    const queryLocation = this.workLocationListRepository.createQueryBuilder('location_list');
-    queryLocation.leftJoinAndSelect('location_list.location_id', 'location_id');
-    queryLocation.where('location_id.id IN (:...locations_id)', { locations_id: locationIds });
-    queryLocation.select(['location_list.id', 'location_list.lat', 'location_list.lng', 'location_id.id', 'location_list.list_number']);
-    queryLocation.orderBy('location_list.list_number', 'ASC'); // Urutkan berdasarkan nomor list
-    const locations = await queryLocation.getMany();
-    const formateDate = formateDateNow()
-    let timerCreated = false;
+    const findTask = await this.groupTaskRepository.findOne({
+      where: {
+        user_id: Like(`${userId}`)
+      },
+      relations: ['user_id']
+    })
 
-    await Promise.all(locations.map(async (location) => {
-      const resultDistance = await calculateDistance({ lat, lng }, location);
-      if (resultDistance <= 5) {
-        timerCreated = true
+    if (findTask) {
+      const queryTask = this.taskRepository.createQueryBuilder('task');
+      queryTask.leftJoinAndSelect('task.location_id', 'location_id');
+      queryTask.select(['task.id', 'location_id.id']);
+      const tasks = await queryTask.getMany();
+      const locationIds = tasks.map((task) => task.location_id.id);
+
+      const queryLocation = this.workLocationListRepository.createQueryBuilder('location_list');
+      queryLocation.leftJoinAndSelect('location_list.location_id', 'location_id');
+      queryLocation.where('location_id.id IN (:...locations_id)', { locations_id: locationIds });
+      queryLocation.select(['location_list.id', 'location_list.lat', 'location_list.lng', 'location_id.id', 'location_list.list_number']);
+      queryLocation.orderBy('location_list.list_number', 'ASC');
+      const locations = await queryLocation.getMany();
+      const formateDate = formateDateNow()
+      let timerCreated = false;
+
+      await Promise.all(locations.map(async (location) => {
+        const resultDistance = await calculateDistance({ lat, lng }, location);
+        if (resultDistance <= 5) {
+          timerCreated = true
+        }
+      }));
+
+      const locationId: any = locations[0].location_id?.id
+
+      if (timerCreated) {
+        const createTimer = this.timerRepository.create({
+          inLocation: formateDate,
+          user_id: userId,
+          location_id: locationId
+        });
+        await this.timerRepository.save(createTimer);
       }
-    }));
-
-    const locationId: any = locations[0].location_id?.id
-
-    if (timerCreated) {
-      const createTimer = this.timerRepository.create({
-        inLocation: formateDate,
-        user_id: userId,
-        location_id: locationId
-      });
-      await this.timerRepository.save(createTimer);
     }
   }
 

@@ -14,15 +14,18 @@ export default class WorkLocationLists {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => WorkLocations)
+  @ManyToOne(() => WorkLocations, {
+    onDelete: 'CASCADE',
+    onUpdate: "CASCADE"
+  })
   @JoinColumn({ name: 'location_id' })
   location_id: WorkLocations;
 
-  @Column()
-  lat: string;
+  @Column({ type: 'double' })
+  lat: number;
 
-  @Column()
-  lng: string;
+  @Column({ type: 'double' })
+  lng: number;
 
   @Column()
   list_number: number;

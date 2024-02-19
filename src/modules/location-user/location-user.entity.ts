@@ -16,16 +16,19 @@ export default class UserLocations {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  lat: string;
+  @Column({type: "double"})
+  lat: number;
 
-  @Column()
-  lng: string;
+  @Column({ type: 'double' })
+  lng: number;
 
   @Column({ type: 'tinyint', default: false })
   isActive: boolean;
 
-  @ManyToOne(() => Users)
+  @ManyToOne(() => Users, {
+    onDelete: 'CASCADE',
+    onUpdate: "CASCADE"
+  })
   @JoinColumn({ name: 'user_id' })
   user_id: Users;
 

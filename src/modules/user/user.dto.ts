@@ -22,10 +22,10 @@ export class CreateUserDto {
   phone: string;
 
   @ApiProperty()
-  lat: string;
+  lat: number;
 
   @ApiProperty()
-  lng: string;
+  lng: number;
 
   @ApiProperty()
   image_url: string[];

@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import UserLocations from '../location-user/location-user.entity';
-import Tasks from '../task/task.entity';
+import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
 
 
 export enum Role {
@@ -39,11 +39,11 @@ export default class Users {
   @Column({ type: 'simple-array', nullable: true })
   image_url: string[];
 
-  @Column()
-  lat: string;
+  @Column({ type: 'double' })
+  lat: number;
 
-  @Column()
-  lng: string;
+  @Column({ type: 'double' })
+  lng: number;
 
   @Column({ nullable: true })
   jwt_token: string;
@@ -58,12 +58,12 @@ export default class Users {
   })
   location_users: UserLocations[];
 
-  @OneToMany(() => Tasks, (task) => task.user_id, {
+  @OneToMany(() => GroupTaskUsers, (groupTask) => groupTask.user_id, {
     cascade: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })
-  tasks: Tasks[];
+  groupTaskUsers: GroupTaskUsers[];
 
 
   @CreateDateColumn()
