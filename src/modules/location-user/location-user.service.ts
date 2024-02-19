@@ -235,7 +235,7 @@ export class UserLocationService {
   //     const userLocation = this.locationUserRepository.create(payload);
   //     const createdUserLocation : any= await this.locationUserRepository.save(userLocation);
 
-  //     // Mengumpulkan semua Lokasi yang dibuat
+  //     // Mengumpulkan semua lokasi yang dibuat
   //     createdLocations.push(createdUserLocation);
 
   //     // Mengirimkan informasi ke socket setiap kali membuat lokasi
