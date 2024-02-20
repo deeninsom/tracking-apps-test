@@ -124,27 +124,30 @@ export class UserLocationService {
       lng,
       isActive: true,
     } as any);
-    const currentMinute = new Date().getMinutes();
+    // const currentMinute = new Date().getMinutes();
 
-    const existingLocationUser = await this.locationUserRepository
-      .createQueryBuilder('locationUser')
-      .where('locationUser.user_id = :userId', { userId })
-      .andWhere('DATE(locationUser.created_at) = CURRENT_DATE')
-      .getOne();
+    // const existingLocationUser = await this.locationUserRepository
+    //   .createQueryBuilder('locationUser')
+    //   .where('locationUser.user_id = :userId', { userId })
+    //   .andWhere('DATE(locationUser.created_at) = CURRENT_DATE')
+    //   .getOne();
 
-    // 5 minutes interval for hitting the Google API
-    const isInterval = currentMinute % 5 === 0;
-    if (!isInterval && !existingLocationUser) {
-      const locationJson = await getAddressComponents(lat, lng);
-      locationUser.location_json = locationJson;
-      console.log('kondisi 1 di eksekusi');
-    }
+    // // 5 minutes interval for hitting the Google API
+    // const isInterval = currentMinute % 5 === 0;
+    // if (!isInterval && !existingLocationUser) {
+    //   const locationJson = await getAddressComponents(lat, lng);
+    //   locationUser.location_json = locationJson;
+    //   console.log('kondisi 1 di eksekusi');
+    // }
 
-    if (isInterval) {
-      const locationJson = await getAddressComponents(lat, lng);
-      locationUser.location_json = locationJson;
-      console.log('kondisi 2 di eksekusi');
-    }
+    // if (isInterval) {
+    //   const locationJson = await getAddressComponents(lat, lng);
+    //   locationUser.location_json = locationJson;
+    //   console.log('kondisi 2 di eksekusi');
+    // }
+
+    const locationJson = await getAddressComponents(lat, lng);
+    locationUser.location_json = locationJson;
 
     const newLocationUser = await this.locationUserRepository.save(
       locationUser,
