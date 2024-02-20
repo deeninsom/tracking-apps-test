@@ -14,7 +14,7 @@ export class UserLocationService {
 
     private readonly socketGateway: SocketGateway,
     private readonly timerService: TimerService,
-  ) {}
+  ) { }
 
   async get(
     userId: string,
@@ -152,6 +152,8 @@ export class UserLocationService {
     const newLocationUser = await this.locationUserRepository.save(
       locationUser,
     );
+
+    this.timerService.create(lat, lng, userId)
 
     return newLocationUser;
   }

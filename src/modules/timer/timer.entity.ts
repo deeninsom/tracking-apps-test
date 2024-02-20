@@ -15,7 +15,7 @@ export default class Timers {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ default: 1 })
+  @Column({ default: 2 })
   duration: number;
 
   @Column()
