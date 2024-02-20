@@ -16,10 +16,13 @@ export class TaskService {
 
   async get(page: number, limit: number) {
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
+    queryBuilder.leftJoinAndSelect('task.location_id', 'location_id')
     queryBuilder.orderBy('task.created_at', 'DESC')
     queryBuilder.select([
       'task.id',
       'task.name',
+      'location_id.id',
+      'location_id.label',
       'task.created_at',
       'task.updated_at'
     ]);
