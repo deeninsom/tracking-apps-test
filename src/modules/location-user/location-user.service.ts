@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
-import { getAddressComponents } from 'src/utils/getAddressComponents';
+import { getAddressComponents } from '../../utils/getAddressComponents';
 
 @Injectable()
 export class UserLocationService {
