@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,10 +13,18 @@ import Timers from '../timer/timer.entity';
 import Tasks from '../task/entity/task.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
 import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
+import { DuplicateRequestMiddleware } from '../../middleware/DuplicateRequestMiddleware';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Users, UserLocations, Timers, Tasks, GroupTaskUsers, WorkLocationLists]),
+    TypeOrmModule.forFeature([
+      Users,
+      UserLocations,
+      Timers,
+      Tasks,
+      GroupTaskUsers,
+      WorkLocationLists,
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: jwtConfigFactory,
@@ -26,4 +34,8 @@ import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
   controllers: [UserLocationController],
   providers: [UserLocationService, SocketGateway, TimerService],
 })
-export class UserLocationModule {}
+export class UserLocationModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DuplicateRequestMiddleware).forRoutes('user-locations/v2');
+  }
+}
