@@ -14,7 +14,7 @@ export class DuplicateRequestMiddleware implements NestMiddleware {
       if (currentTime - lastRequestTime < 30000) {
         return res.status(200).json({
           status: true,
-          message: 'Because there is duplicate data, the data is not saved',
+          message: 'Because there is duplicate request in same time, the data is not saved',
         });
       }
     }
