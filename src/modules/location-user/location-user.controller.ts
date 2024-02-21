@@ -119,8 +119,7 @@ export class UserLocationController {
   ) {
     try {
       const { userId, lat, lng } = body;
-      const newLocationUser =
-        await this.userLocationService.createLocationUserV2(userId, lat, lng);
+      const newLocationUser = await this.userLocationService.createLocationUserV2(userId, lat, lng);
       return res.status(201).json({
         status: true,
         message: 'Berhasil menambahkan lokasi user',

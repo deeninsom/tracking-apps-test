@@ -114,16 +114,19 @@ export class UserLocationService {
   }
 
   async createLocationUserV2(
-    userId: string,
+    userId: any,
     lat: string,
     lng: string,
-  ): Promise<UserLocations[]> {
-    const locationUser: any = this.locationUserRepository.create({
+  ): Promise<any> {
+    const locationJson = await getAddressComponents(parseFloat(lat), parseFloat(lng));
+    const payload: any = {
       user_id: userId,
-      lat,
-      lng,
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
       isActive: true,
-    } as any);
+      location_json: locationJson
+    }
+    const locationUser: any = this.locationUserRepository.create(payload);
     // const currentMinute = new Date().getMinutes();
 
     // const existingLocationUser = await this.locationUserRepository
@@ -146,8 +149,6 @@ export class UserLocationService {
     //   console.log('kondisi 2 di eksekusi');
     // }
 
-    const locationJson = await getAddressComponents(lat, lng);
-    locationUser.location_json = locationJson;
 
     const newLocationUser = await this.locationUserRepository.save(
       locationUser,
