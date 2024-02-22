@@ -35,14 +35,18 @@ export class UpdateTaskDto {
 
   @ApiProperty()
   @IsOptional()
+  location_id: string;
+
+  @ApiProperty({
+    description: 'Array of objects containing user id',
+    type: [GroupTaskUserDto],
+    example: [{ user_id: 'uuid' }]
+  })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => GroupTaskUserDto)
   users: GroupTaskUserDto[];
-
-  @ApiProperty()
-  @IsOptional()
-  location_id: string;
 }
 
 export class QueryTaskDTO {

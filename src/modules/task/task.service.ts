@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import Tasks from './entity/task.entity';
 import GroupTaskUsers from './entity/groupTaskUser.entity';
 
@@ -47,7 +47,7 @@ export class TaskService {
     queryBuilder.leftJoinAndSelect('task.grouping', 'users')
     queryBuilder.leftJoinAndSelect('task.location_id', 'location_id')
     queryBuilder.leftJoinAndSelect('users.user_id', 'user_id')
-   
+
     queryBuilder.select([
       'task.id',
       'task.name',
@@ -82,7 +82,7 @@ export class TaskService {
 
     if (user && user.length > 0) {
       const userList = user.map((val: any) => { return { user_id: val.user_id, task_id: createdTask.id } })
-      
+
       await this.groupTaskUsersRepository
         .createQueryBuilder()
         .insert()
@@ -94,14 +94,66 @@ export class TaskService {
   }
 
   async update(id: string, payload: any): Promise<Tasks> {
-    const task = await this.taskRepository.findOne({ where: { id } });
+    const task = await this.taskRepository.findOne({ where: { id }, relations: ['location_id'] });
 
     if (!task) throw new HttpException(`Task dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
 
-    await this.taskRepository.update(id, payload);
-    const updatedTask = await this.taskRepository.findOne({ where: { id } });
 
-    return updatedTask;
+    if (payload.users.length >= 0) {
+      const checkUsers = await this.groupTaskUsersRepository.find(
+        {
+          where: {
+            task_id: Like(`${id}`)
+          }
+        });
+
+      if (payload.users.length < checkUsers.length) {
+        const findTask = await this.groupTaskUsersRepository.find({
+          where: {
+            task_id: Like(`${task.id}`),
+            user_id: Not(In(payload.users.map((val: any) => val.user_id)))
+          },
+          relations: ['user_id', 'task_id']
+        });
+        findTask.map(async (val: any) => {
+          await this.groupTaskUsersRepository.delete(val.id);
+        })
+        console.log({
+          text: 'Kurang dari current user',
+          data: findTask
+        })
+      } else if (payload.users.length > checkUsers.length) {
+        const findTask = await this.groupTaskUsersRepository.find({
+          where: {
+            task_id: Like(`${task.id}`),
+            user_id: In(payload.users.map((val: any) => val.user_id))
+          },
+          relations: ['user_id', 'task_id']
+        });
+
+        const result = findTask.map((value) => value.user_id.id).toString()
+        const checkData = payload.users.filter((val: any) => val.user_id !== result)
+        const payloads: any = {
+          task_id: '',
+          user_id: ''
+        }
+
+        checkData.map(async (val: any) => {
+          payloads.user_id = val.user_id
+          payloads.task_id = id
+          const results = this.groupTaskUsersRepository.create(payloads)
+          await this.groupTaskUsersRepository.save(results)
+        })
+      }
+    }
+
+    if (payload.name !== task.name || payload.location_id !== task.location_id?.id) {
+      await this.taskRepository.update(id, {
+        name: payload.name,
+        location_id: payload.location_id
+      })
+    }
+    return await this.taskRepository.findOne({ where: { id } })
   }
 
   async delete(id: string): Promise<void> {
@@ -109,6 +161,6 @@ export class TaskService {
 
     if (!task) throw new HttpException(`Task dengan id ${id} tidak ditemukan !`, HttpStatus.NOT_FOUND)
 
-    await this.taskRepository.delete(id);
+    await this.taskRepository.delete(task.id);
   }
 }
