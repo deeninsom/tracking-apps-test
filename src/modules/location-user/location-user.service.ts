@@ -118,45 +118,27 @@ export class UserLocationService {
     lat: string,
     lng: string,
   ): Promise<any> {
-    const locationJson = await getAddressComponents(parseFloat(lat), parseFloat(lng));
-    const payload: any = {
-      user_id: userId,
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
-      isActive: true,
-      location_json: locationJson
+    try {
+      const locationJson = await getAddressComponents(parseFloat(lat), parseFloat(lng));
+      const payload: any = {
+        user_id: userId,
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        isActive: true,
+        location_json: locationJson
+      }
+      if (locationJson) {
+        const locationUser: any = this.locationUserRepository.create(payload);
+        const newLocationUser = await this.locationUserRepository.save(
+          locationUser,
+        );
+
+        this.timerService.create(lat, lng, userId)
+        return newLocationUser;
+      }
+    } catch (error) {
+      return error
     }
-    const locationUser: any = this.locationUserRepository.create(payload);
-    // const currentMinute = new Date().getMinutes();
-
-    // const existingLocationUser = await this.locationUserRepository
-    //   .createQueryBuilder('locationUser')
-    //   .where('locationUser.user_id = :userId', { userId })
-    //   .andWhere('DATE(locationUser.created_at) = CURRENT_DATE')
-    //   .getOne();
-
-    // // 5 minutes interval for hitting the Google API
-    // const isInterval = currentMinute % 5 === 0;
-    // if (!isInterval && !existingLocationUser) {
-    //   const locationJson = await getAddressComponents(lat, lng);
-    //   locationUser.location_json = locationJson;
-    //   console.log('kondisi 1 di eksekusi');
-    // }
-
-    // if (isInterval) {
-    //   const locationJson = await getAddressComponents(lat, lng);
-    //   locationUser.location_json = locationJson;
-    //   console.log('kondisi 2 di eksekusi');
-    // }
-
-
-    const newLocationUser = await this.locationUserRepository.save(
-      locationUser,
-    );
-
-    this.timerService.create(lat, lng, userId)
-
-    return newLocationUser;
   }
 
   async getForMobile(userId: string) {
