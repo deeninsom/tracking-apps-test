@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -36,6 +41,8 @@ import { DuplicateRequestMiddleware } from '../../middleware/DuplicateRequestMid
 })
 export class UserLocationModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DuplicateRequestMiddleware).forRoutes('user-locations/v2');
+    consumer
+      .apply(DuplicateRequestMiddleware)
+      .forRoutes({ path: 'user-locations/v2', method: RequestMethod.POST });
   }
 }
