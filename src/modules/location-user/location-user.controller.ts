@@ -19,15 +19,15 @@ import {
   CreateLocationUserV2DTO,
   CreateUserLocationDTO,
   QueryUserLocationDTO,
-  QueryUserLocationOnMobileDTO,
+  // QueryUserLocationOnMobileDTO,
   QueryUserLocationV2DTO,
   UpdateUserLocationDTO,
 } from './location-user.dto';
 
 @ApiTags('user-locations')
 @Controller('user-locations')
-// @UseGuards(AuthGuard)
-// @ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('access-token')
 export class UserLocationController {
   constructor(private readonly userLocationService: UserLocationService) {}
 

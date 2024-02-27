@@ -15,9 +15,7 @@ import Users from '../user/user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
 import Timers from '../timer/timer.entity';
-import Tasks from '../task/entity/task.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
-import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
 import { DuplicateRequestMiddleware } from '../../middleware/DuplicateRequestMiddleware';
 
 @Module({
@@ -26,8 +24,6 @@ import { DuplicateRequestMiddleware } from '../../middleware/DuplicateRequestMid
       Users,
       UserLocations,
       Timers,
-      Tasks,
-      GroupTaskUsers,
       WorkLocationLists,
     ]),
     JwtModule.registerAsync({
