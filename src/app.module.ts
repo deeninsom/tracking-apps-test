@@ -18,15 +18,10 @@ import WorkLocations from './modules/work-location/entity/work-location.entity';
 import WorkLocationLists from './modules/work-location/entity/work.location-list.entity';
 import { WorkLocationModule } from './modules/work-location/work-location.module';
 import { SocketGateway } from './modules/socket/socket.service';
-import Tasks from './modules/task/entity/task.entity';
-import { TaskModule } from './modules/task/task.module';
 import { AppController } from './base-api';
 import { GoogleApiModule } from './modules/google-api/google.module';
 import { TimerModule } from './modules/timer/timer.module';
 import Timers from './modules/timer/timer.entity';
-import GroupTaskUsers from './modules/task/entity/groupTaskUser.entity';
-
-
 
 @Module({
   imports: [
@@ -47,14 +42,12 @@ import GroupTaskUsers from './modules/task/entity/groupTaskUser.entity';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD || '',
       database: process.env.DATABASE_NAME,
-      synchronize: true,
+      synchronize: process.env.SYNC_DB === 'true',
       entities: [
         Users,
         UserLocations,
         WorkLocations,
         WorkLocationLists,
-        Tasks,
-        GroupTaskUsers,
         Timers
       ],
     }),
@@ -63,7 +56,6 @@ import GroupTaskUsers from './modules/task/entity/groupTaskUser.entity';
     UserModule,
     UserLocationModule,
     WorkLocationModule,
-    TaskModule,
     GoogleApiModule,
     TimerModule
   ],
