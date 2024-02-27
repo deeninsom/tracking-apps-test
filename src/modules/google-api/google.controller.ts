@@ -1,10 +1,13 @@
-import { Controller, Get, ParseFloatPipe, Query, Res } from "@nestjs/common";
+import { Controller, Get, ParseFloatPipe, Query, Res, UseGuards } from "@nestjs/common";
 import { GoogleApiService } from "./google.service";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/auth.guard';
 import { Response } from "express";
 
 @ApiTags('geojson')
 @Controller('geojson')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('access-token')
 export class GoogleApiController {
   constructor(private readonly googleApiService: GoogleApiService) {}
 
