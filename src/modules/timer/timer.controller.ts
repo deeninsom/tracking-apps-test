@@ -2,25 +2,20 @@ import {
     Controller,
     UseGuards,
     Get,
-    Post,
-    Put,
-    Delete,
-    Param,
-    Body,
     Query,
     Res,
     HttpException,
   } from '@nestjs/common';
   import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
   import { AuthGuard } from '../auth/auth.guard';
-  import { Response, query } from 'express';
+  import { Response } from 'express';
 import { TimerService } from './timer.service';
 import { QueryTimerDTO } from './timer.dto';
   
   @ApiTags('timers')
   @Controller('timers')
-  // @UseGuards(AuthGuard)
-  // @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('access-token')
   export class TimerController {
     constructor(private readonly timerService: TimerService) { }
   
