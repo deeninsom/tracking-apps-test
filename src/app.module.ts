@@ -29,8 +29,8 @@ import Timers from './modules/timer/timer.entity';
       isGlobal: true,
       envFilePath:
         process.env.NODE_ENV === 'Production'
-          ? '.env.production'
-          : '.env.development',
+          ? process.env.NODE_ENV
+          : process.env.NODE_ENV,
       load: [cloudinaryConfig],
     }),
 
