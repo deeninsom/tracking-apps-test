@@ -7,8 +7,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import UserLocations from '../location-user/location-user.entity';
-import GroupTaskUsers from '../task/entity/groupTaskUser.entity';
-
 
 export enum Role {
   pengawas = 'pengawas',
@@ -57,14 +55,6 @@ export default class Users {
     onUpdate: 'CASCADE',
   })
   location_users: UserLocations[];
-
-  @OneToMany(() => GroupTaskUsers, (groupTask) => groupTask.user_id, {
-    cascade: true,
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  groupTaskUsers: GroupTaskUsers[];
-
 
   @CreateDateColumn()
   public created_at: Date;
