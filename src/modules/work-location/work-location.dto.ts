@@ -1,7 +1,7 @@
 import { IsOptional } from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsNotEmpty, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
 
 
 class Location {
@@ -13,6 +13,7 @@ class Location {
 
   @ApiProperty()
   lng: number;
+  
 }
 
 export class CreateWorkLocationDTO {
@@ -23,6 +24,14 @@ export class CreateWorkLocationDTO {
   @ApiProperty()
   @IsBoolean()
   isActive: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  range: number;
+
+  @ApiProperty()
+  @IsEnum(['paid', 'unpaid'])
+  payment_status: string;
 
   @ApiProperty({
     description: 'Array of objects containing latitude (lat) and longitude (lng)',
@@ -42,6 +51,27 @@ export class UpdateWorkLocationDTO {
   @ApiProperty()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsNumber()
+  range?: number;
+
+  // @ApiProperty()
+  // @IsOptional()
+  // @IsEnum(['paid', 'unpaid'])
+  // payment_status?: string;
+
+  @ApiProperty({
+    description: 'Array of objects containing latitude (lat) and longitude (lng)',
+    type: [Location],
+    example: [{ lat: 40.7128, lng: -74.0060, list_number: 0 }]
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Location)
+  location?: Location[];
 }
 
 export class QueryWorkLocationDTO {

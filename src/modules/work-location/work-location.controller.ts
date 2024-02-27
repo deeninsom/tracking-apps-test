@@ -23,8 +23,8 @@ import {
 
 @ApiTags('work-locations')
 @Controller('work-locations')
-// @UseGuards(AuthGuard)
-// @ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
+@ApiBearerAuth('access-token')
 export class WorkLocationController {
   constructor(private readonly workLocationService: WorkLocationService) { }
 
