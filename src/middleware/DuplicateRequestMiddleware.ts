@@ -20,7 +20,6 @@ export class DuplicateRequestMiddleware implements NestMiddleware {
     }
 
     this.cache.set(cacheKey, Date.now());
-console.log(cacheKey)
     next();
   }
 
