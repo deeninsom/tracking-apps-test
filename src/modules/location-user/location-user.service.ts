@@ -42,11 +42,8 @@ export class UserLocationService {
         created_at: day,
       });
     if (userId) {
-      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
-        user_id: userId,
-      });
       queryBuilder.andWhere(
-        'lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations)',
+        `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id: userId }
       );
     }
 
