@@ -6,8 +6,8 @@ import { Response } from "express";
 
 @ApiTags('geojson')
 @Controller('geojson')
-@UseGuards(AuthGuard)
-@ApiBearerAuth('access-token')
+// @UseGuards(AuthGuard)
+// @ApiBearerAuth('access-token')
 export class GoogleApiController {
   constructor(private readonly googleApiService: GoogleApiService) {}
 

@@ -26,8 +26,8 @@ import {
 
 @ApiTags('user-locations')
 @Controller('user-locations')
-@UseGuards(AuthGuard)
-@ApiBearerAuth('access-token')
+// @UseGuards(AuthGuard)
+// @ApiBearerAuth('access-token')
 export class UserLocationController {
   constructor(private readonly userLocationService: UserLocationService) {}
 

@@ -14,8 +14,8 @@ import { QueryTimerDTO } from './timer.dto';
   
   @ApiTags('timers')
   @Controller('timers')
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth('access-token')
+  // @UseGuards(AuthGuard)
+  // @ApiBearerAuth('access-token')
   export class TimerController {
     constructor(private readonly timerService: TimerService) { }
   
