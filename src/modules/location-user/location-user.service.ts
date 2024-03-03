@@ -17,57 +17,57 @@ export class UserLocationService {
   ) { }
 
   async get(
-    userId: string,
-    year: any,
-    month: any,
-    day: any,
-    sort: any,
-    page: number,
-    limit: number,
   ) {
-    const queryBuilder =
-      this.locationUserRepository.createQueryBuilder('lokasi_user');
-    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user')
+      .innerJoin(subQuery => {
+        return subQuery
+          .select("lu.user_id", "userId")
+          .addSelect("MAX(lu.created_at)", "maxCreatedAt")
+          .from("user_locations", "lu")
+          .groupBy("lu.user_id");
+      }, "latestUserEntries", "lokasi_user.user_id = latestUserEntries.userId AND lokasi_user.created_at = latestUserEntries.maxCreatedAt")
+    .select([
+      'lokasi_user.id',
+      'lokasi_user.lat',
+      'lokasi_user.lng',
+      'lokasi_user.isActive',
+      'user.id',
+      'user.name',
+      'lokasi_user.created_at',
+      'lokasi_user.updated_at'
+    ])
+    // if (year)
+    //   queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', {
+    //     created_at: year,
+    //   });
+    // if (month)
+    //   queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', {
+    //     created_at: month,
+    //   });
+    // if (day)
+    //   queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', {
+    //     created_at: day,
+    //   });
 
-    if (year)
-      queryBuilder.andWhere('YEAR(lokasi_user.created_at) = :created_at', {
-        created_at: year,
-      });
-    if (month)
-      queryBuilder.andWhere('MONTH(lokasi_user.created_at) = :created_at', {
-        created_at: month,
-      });
-    if (day)
-      queryBuilder.andWhere('DAY(lokasi_user.created_at) = :created_at', {
-        created_at: day,
-      });
-    if (userId) {
-      queryBuilder.andWhere(
-        `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id: userId }
-      );
-    }
+    // if (userId) {
+    //   queryBuilder.andWhere(
+    //     `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id IN user_id)`
+    //   );
+    // }
 
-    if (sort == true) {
-      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
-      queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
-    }
+    // if (sort == true) {
+    //   queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
+    //   queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
+    // }
 
-    let dataQuery = queryBuilder;
 
-    if (limit && page) {
-      const skip = (page - 1) * limit;
-      dataQuery = dataQuery.take(limit).skip(skip);
-    }
 
-    const [data, total] = await dataQuery.getManyAndCount();
-
-    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+    const dataResult : any= await queryBuilder.getMany();
+    console.log(dataResult)
 
     return {
-      data: data || [],
-      page: limit && page ? page : undefined,
-      totalPages,
-      totalRows: total,
+      data: dataResult || []
     };
   }
 
@@ -159,16 +159,12 @@ export class UserLocationService {
   }
 
   async getId(id: string): Promise<UserLocations> {
-    const userLocation = await this.locationUserRepository.findOne({
-      where: { id },
-    });
-    if (!userLocation)
-      throw new HttpException(
-        `Lokasi user dengan id ${id} tidak ditemukan !`,
-        HttpStatus.NOT_FOUND,
-      );
-
-    return userLocation;
+    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+    queryBuilder.andWhere(
+      `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id }
+    );
+    return queryBuilder.getOne();
   }
 
   create(payload: any): Promise<UserLocations[]> {

@@ -25,55 +25,55 @@ export class UpdateUserLocationDTO {
 }
 
 export class QueryUserLocationDTO {
-  @ApiProperty({
-    description: 'find By user_id',
-    required: false,
-  })
-  @IsOptional()
-  user_id?: string;
+  // @ApiProperty({
+  //   description: 'find By user_id',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // user_id?: string;
 
-  @ApiProperty({
-    description: 'find By year',
-    required: false,
-  })
-  @IsOptional()
-  year?: number;
+  // @ApiProperty({
+  //   description: 'find By year',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // year?: number;
 
-  @ApiProperty({
-    description: 'find By month',
-    required: false,
-  })
-  @IsOptional()
-  month?: string;
+  // @ApiProperty({
+  //   description: 'find By month',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // month?: string;
 
-  @ApiProperty({
-    description: 'find By date',
-    required: false,
-  })
-  @IsOptional()
-  date?: string;
+  // @ApiProperty({
+  //   description: 'find By date',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // date?: string;
 
-  @ApiProperty({
-    description: 'sort by date now',
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  sort?: boolean;
+  // @ApiProperty({
+  //   description: 'sort by date now',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // @IsBoolean()
+  // sort?: boolean;
 
-  @ApiProperty({
-    description: 'get page',
-    required: false,
-  })
-  @IsOptional()
-  page?: number;
+  // @ApiProperty({
+  //   description: 'get page',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // page?: number;
 
-  @ApiProperty({
-    description: 'get limit',
-    required: false,
-  })
-  @IsOptional()
-  limit?: number;
+  // @ApiProperty({
+  //   description: 'get limit',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // limit?: number;
 }
 export enum SortingDirection {
   ASC = 'ASC',

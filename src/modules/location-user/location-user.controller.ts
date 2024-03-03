@@ -35,25 +35,11 @@ export class UserLocationController {
   async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
     try {
       const {
-        data,
-        page: currentPage,
-        totalPages,
-        totalRows,
-      } = await this.userLocationService.get(
-        query.user_id,
-        query.year,
-        query.month,
-        query.date,
-        query.sort,
-        query.page,
-        query.limit,
-      );
+        data
+      } = await this.userLocationService.get();
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan lokasi user',
-        page: currentPage,
-        totalPages,
-        totalRows,
         data,
       });
     } catch (error) {
@@ -161,8 +147,8 @@ export class UserLocationController {
   //   }
   // }
 
-  @Get(':id')
-  async getUserById(@Param('id') id: string, @Res() res: Response) {
+  @Get(':user_id')
+  async getUserById(@Param('user_id') id: string, @Res() res: Response) {
     try {
       const data = await this.userLocationService.getId(id);
       return res.status(200).json({
