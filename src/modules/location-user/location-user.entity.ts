@@ -38,6 +38,9 @@ export default class UserLocations {
   @Column({ type: 'double' })
   speed: number;
 
+  @Column({ type: 'tinyint', default: false })
+  isDriving: boolean;
+
   @CreateDateColumn()
   public created_at: Date;
 
