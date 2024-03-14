@@ -132,16 +132,16 @@ export class CreateLocationUserV2DTO {
     required: true,
   })
   @IsNotEmpty()
-  @IsString()
-  lat: string;
+  // @IsString()
+  lat: number;
 
   @ApiProperty({
     description: 'Longitude',
     required: true,
   })
   @IsNotEmpty()
-  @IsString()
-  lng: string;
+  // @IsString()
+  lng: number;
 }
 
 export class QueryUserLocationOnMobileDTO {

@@ -64,7 +64,6 @@ export class UserLocationService {
 
 
     const dataResult : any= await queryBuilder.getMany();
-    console.log(dataResult)
 
     return {
       data: dataResult || []
@@ -112,15 +111,15 @@ export class UserLocationService {
 
   async createLocationUserV2(
     userId: any,
-    lat: string,
-    lng: string,
+    lat: any,
+    lng: any,
   ): Promise<any> {
     try {
-      const locationJson = await getAddressComponents(parseFloat(lat), parseFloat(lng));
+      const locationJson = await getAddressComponents(lat, lng);
       const payload: any = {
         user_id: userId,
-        lat: parseFloat(lat),
-        lng: parseFloat(lng),
+        lat: lat,
+        lng: lng,
         isActive: true,
         location_json: locationJson
       }
