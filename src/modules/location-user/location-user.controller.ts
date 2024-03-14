@@ -100,7 +100,7 @@ export class UserLocationController {
 
   @Post('v2')
   async createLocationUserV2(
-    @Body() body: CreateLocationUserV2DTO,
+    @Body() body: any,
     @Res() res: Response,
   ) {
     try {
