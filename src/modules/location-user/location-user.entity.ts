@@ -22,7 +22,7 @@ export default class UserLocations {
   @Column({ type: 'double' })
   lng: number;
 
-  @Column({ type: 'tinyint', default: true })
+  @Column({ type: 'tinyint', default: false })
   isActive: boolean;
 
   @ManyToOne(() => Users, {
@@ -34,6 +34,9 @@ export default class UserLocations {
 
   @Column({ type: 'text', nullable: true })
   location_json: string;
+
+  @Column({ type: 'double' })
+  speed: number;
 
   @CreateDateColumn()
   public created_at: Date;

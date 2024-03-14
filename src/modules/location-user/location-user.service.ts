@@ -113,25 +113,28 @@ export class UserLocationService {
     userId: any,
     lat: any,
     lng: any,
+    isActive: any,
+    speed: any
   ): Promise<any> {
     try {
-      const locationJson = await getAddressComponents(lat, lng);
+      // const locationJson = await getAddressComponents(lat, lng);
       const payload: any = {
         user_id: userId,
         lat: lat,
         lng: lng,
-        isActive: true,
-        location_json: locationJson
+        isActive: isActive,
+        // location_json: locationJson
+        speed: speed
       }
-      if (locationJson) {
-        const locationUser: any = this.locationUserRepository.create(payload);
-        const newLocationUser = await this.locationUserRepository.save(
-          locationUser,
-        );
+      // if (locationJson) {
+      // }
+      const locationUser: any = this.locationUserRepository.create(payload);
+      const newLocationUser = await this.locationUserRepository.save(
+        locationUser,
+      );
 
-        this.timerService.create(lat, lng, userId)
-        return newLocationUser;
-      }
+      this.timerService.create(lat, lng, userId)
+      return newLocationUser;
     } catch (error) {
       return error
     }
