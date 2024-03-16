@@ -10,7 +10,7 @@ export class GoogleApiService {
     let result = {}
     await axios.get(url)
     .then((res)=>{
-        result = res.data
+        result = res.data.results[0].formatted_address
         return result
     }).catch((err)=>{
         return err

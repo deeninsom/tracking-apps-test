@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
-import { getAddressComponents } from '../../utils/getAddressComponents';
+import { getAddress, getAddressComponents } from '../../utils/getAddressComponents';
 import { formatTime } from '../../utils/formatTime';
 import { calculateDuration } from '../../utils/calculateDuration';
 import { calculateDistanceKm } from '../../utils/calculateDistance';
@@ -135,17 +135,22 @@ export class UserLocationService {
 
     const [data] = await queryBuilder.getManyAndCount();
 
-    function groupData(data: any) {
+    async function groupData(data: any) {
       const groupedData = [];
       const tempGroup = {
         time: "",
         data: [],
         status: "",
+        locationStart: "",
+        locationEnd: ""
+      };
+
+      const getLocation = {
         startLatitude: 0,
         startLongitude: 0,
         endLatitude: 0,
         endLongitude: 0
-      };
+      }
 
       data.forEach((entry: any, index: any) => {
         if (index === 0 || entry.status !== data[index - 1].status) {
@@ -190,17 +195,29 @@ export class UserLocationService {
             totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
           }
           group.distance = totalDistance.toFixed(2) + "km";
-          group.startLatitude = group.data[0].latitude
-          group.startLongitude = group.data[0].longitude
-          group.endLatitude = group.data[group.data.length - 1].latitude
-          group.endLongitude = group.data[group.data.length - 1].longitude
+          getLocation.startLatitude = group.data[0].latitude
+          getLocation.startLongitude = group.data[0].longitude
+          getLocation.endLatitude = group.data[group.data.length - 1].latitude
+          getLocation.endLongitude = group.data[group.data.length - 1].longitude
         }
       });
+
+      const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude)
+      const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude)
+      // console.log(result)
+      // tempGroup.locationStart = result1
+      // tempGroup.locationEnd = result2
+      groupedData.forEach((item) => {
+        if (item.status === 'moving') {
+          item.locationStart = result1
+          item.locationEnd = result2
+        }
+      })
 
       return groupedData;
     }
 
-    const result = groupData(data);
+    const result = await groupData(data);
 
     return {
       data: result || []
