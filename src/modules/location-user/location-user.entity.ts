@@ -41,6 +41,9 @@ export default class UserLocations {
   @Column({ type: 'tinyint', default: false })
   isDriving: boolean;
 
+  @Column({})
+  status: string
+
   @CreateDateColumn()
   public created_at: Date;
 
