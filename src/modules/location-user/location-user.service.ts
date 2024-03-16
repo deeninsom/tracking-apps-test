@@ -135,15 +135,19 @@ export class UserLocationService {
 
     const [data] = await queryBuilder.getManyAndCount();
 
-    function groupData(data) {
+    function groupData(data: any) {
       const groupedData = [];
       const tempGroup = {
         time: "",
         data: [],
-        status: ""
+        status: "",
+        startLatitude: 0,
+        startLongitude: 0,
+        endLatitude: 0,
+        endLongitude: 0
       };
 
-      data.forEach((entry, index) => {
+      data.forEach((entry: any, index: any) => {
         if (index === 0 || entry.status !== data[index - 1].status) {
           if (tempGroup.data.length > 0) {
             groupedData.push({
@@ -186,6 +190,10 @@ export class UserLocationService {
             totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
           }
           group.distance = totalDistance.toFixed(2) + "km";
+          group.startLatitude = group.data[0].latitude
+          group.startLongitude = group.data[0].longitude
+          group.endLatitude = group.data[group.data.length - 1].latitude
+          group.endLongitude = group.data[group.data.length - 1].longitude
         }
       });
 
