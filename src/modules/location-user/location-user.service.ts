@@ -206,7 +206,8 @@ export class UserLocationService {
     lng: any,
     isActive: any,
     speed: any,
-    isDriving: any
+    isDriving: any,
+    status: string
   ): Promise<any> {
     try {
       // const locationJson = await getAddressComponents(lat, lng);
@@ -217,7 +218,8 @@ export class UserLocationService {
         isActive: isActive,
         // location_json: locationJson
         speed: speed,
-        isDriving: isDriving
+        isDriving: isDriving,
+        status: status
       }
       // if (locationJson) {
       // }
