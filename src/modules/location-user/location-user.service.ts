@@ -5,9 +5,9 @@ import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
 import { getAddressComponents } from '../../utils/getAddressComponents';
-import { formatTime } from 'src/utils/formatTime';
-import { calculateDuration } from 'src/utils/calculateDuration';
-import { calculateDistanceKm } from 'src/utils/calculateDistance.utils';
+import { formatTime } from '../../utils/formatTime';
+import { calculateDuration } from '../../utils/calculateDuration';
+import { calculateDistanceKm } from '../../utils/calculateDistance';
 
 @Injectable()
 export class UserLocationService {
