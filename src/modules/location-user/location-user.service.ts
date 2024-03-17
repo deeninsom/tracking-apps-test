@@ -135,90 +135,98 @@ export class UserLocationService {
 
     const [data] = await queryBuilder.getManyAndCount();
 
-    async function groupData(data: any) {
-      const groupedData = [];
-      const tempGroup = {
-        time: "",
-        data: [],
-        status: "",
-        locationStart: "",
-        locationEnd: ""
-      };
+    if (data.length > 0) {
 
-      const getLocation = {
-        startLatitude: 0,
-        startLongitude: 0,
-        endLatitude: 0,
-        endLongitude: 0
-      }
 
-      data.forEach((entry: any, index: any) => {
-        if (index === 0 || entry.status !== data[index - 1].status) {
-          if (tempGroup.data.length > 0) {
-            groupedData.push({
-              time: tempGroup.time,
-              data: [...tempGroup.data],
-              status: tempGroup.status
-            });
-            tempGroup.data = [];
-          }
-          tempGroup.time = entry.created_at;
-          tempGroup.status = entry.status;
+
+      async function groupData(data: any) {
+        const groupedData = [];
+        const tempGroup = {
+          time: "",
+          data: [],
+          status: "",
+          locationStart: "",
+          locationEnd: ""
+        };
+
+        const getLocation = {
+          startLatitude: 0,
+          startLongitude: 0,
+          endLatitude: 0,
+          endLongitude: 0
         }
-        tempGroup.data.push({
-          latitude: entry.lat,
-          longitude: entry.lng
-        });
-      });
 
-      if (tempGroup.data.length > 0) {
-        groupedData.push({
-          time: tempGroup.time,
-          data: [...tempGroup.data],
-          status: tempGroup.status
-        });
-      }
-
-      groupedData.forEach((group, index) => {
-        const startTime = new Date(group.time);
-        const endTime = new Date(
-          groupedData[index + 1]?.time || data[data.length - 1].created_at
-        );
-        const duration = calculateDuration(startTime, endTime);
-        group.time = `${formatTime(startTime)} - ${formatTime(endTime)} (${duration})`;
-
-        if (group.status === "moving") {
-          let totalDistance = 0;
-          for (let i = 0; i < group.data.length - 1; i++) {
-            const { latitude: lat1, longitude: lon1 } = group.data[i];
-            const { latitude: lat2, longitude: lon2 } = group.data[i + 1];
-            totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
+        data.forEach((entry: any, index: any) => {
+          if (index === 0 || entry.status !== data[index - 1].status) {
+            if (tempGroup.data.length > 0) {
+              groupedData.push({
+                time: tempGroup.time,
+                data: [...tempGroup.data],
+                status: tempGroup.status
+              });
+              tempGroup.data = [];
+            }
+            tempGroup.time = entry.created_at;
+            tempGroup.status = entry.status;
           }
-          group.distance = totalDistance.toFixed(2);
-          getLocation.startLatitude = group.data[0].latitude
-          getLocation.startLongitude = group.data[0].longitude
-          getLocation.endLatitude = group.data[group.data.length - 1].latitude
-          getLocation.endLongitude = group.data[group.data.length - 1].longitude
-        }
-      });
+          tempGroup.data.push({
+            latitude: entry.lat,
+            longitude: entry.lng
+          });
+        });
 
-      const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude)
-      const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude)
-      groupedData.forEach((item) => {
-        if (item.status === 'moving') {
+        if (tempGroup.data.length > 0) {
+          groupedData.push({
+            time: tempGroup.time,
+            data: [...tempGroup.data],
+            status: tempGroup.status
+          });
+        }
+
+        groupedData.forEach((group, index) => {
+          const startTime = new Date(group.time);
+          const endTime = new Date(
+            groupedData[index + 1]?.time || data[data.length - 1].created_at
+          );
+          const duration = calculateDuration(startTime, endTime);
+          group.time = `${formatTime(startTime)} - ${formatTime(endTime)} (${duration})`;
+
+          if (group.status === "moving") {
+            let totalDistance = 0;
+            for (let i = 0; i < group.data.length - 1; i++) {
+              const { latitude: lat1, longitude: lon1 } = group.data[i];
+              const { latitude: lat2, longitude: lon2 } = group.data[i + 1];
+              totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
+            }
+            group.distance = totalDistance.toFixed(2);
+            getLocation.startLatitude = group.data[0].latitude
+            getLocation.startLongitude = group.data[0].longitude
+            getLocation.endLatitude = group.data[group.data.length - 1].latitude
+            getLocation.endLongitude = group.data[group.data.length - 1].longitude
+          }
+        });
+
+        const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude)
+        const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude)
+        groupedData.forEach((item) => {
+          if (item.status === 'moving') {
+            item.locationStart = result1
+            item.locationEnd = result2
+          }
           item.locationStart = result1
-          item.locationEnd = result2
-        }
-        item.locationStart = result1
-      })
+        })
 
-      return groupedData;
+        return groupedData;
+      }
+
+      const result = await groupData(data);
+
+      return {
+        data: result || []
+      };
     }
-
-    const result = await groupData(data);
-
     return {
-      data: result || []
+      data: []
     };
   }
 
