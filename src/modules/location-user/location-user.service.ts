@@ -194,7 +194,7 @@ export class UserLocationService {
             const { latitude: lat2, longitude: lon2 } = group.data[i + 1];
             totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
           }
-          group.distance = totalDistance.toFixed(2) + "km";
+          group.distance = totalDistance.toFixed(2);
           getLocation.startLatitude = group.data[0].latitude
           getLocation.startLongitude = group.data[0].longitude
           getLocation.endLatitude = group.data[group.data.length - 1].latitude
@@ -204,14 +204,12 @@ export class UserLocationService {
 
       const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude)
       const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude)
-      // console.log(result)
-      // tempGroup.locationStart = result1
-      // tempGroup.locationEnd = result2
       groupedData.forEach((item) => {
         if (item.status === 'moving') {
           item.locationStart = result1
           item.locationEnd = result2
         }
+        item.locationStart = result1
       })
 
       return groupedData;

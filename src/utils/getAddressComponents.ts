@@ -2,7 +2,6 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 
 export const getAddressComponents = async (lat: any, lng: any) => {
-  console.log('lat: ',lat, "-", "lng: ", lng)
   try {
     const googleMapsResponse = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_KEY}`,
@@ -20,7 +19,6 @@ export const getAddressComponents = async (lat: any, lng: any) => {
 };
 
 export const getAddress = async (lat: any, lng: any) => {
-  console.log('lat: ',lat, "-", "lng: ", lng)
   try {
     const googleMapsResponse = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_KEY}`,
