@@ -1,13 +1,13 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
-import { getAddress, getAddressComponents } from '../../utils/getAddressComponents';
+import { getAddress } from '../../utils/getAddressComponents';
 import { formatTime } from '../../utils/formatTime';
 import { calculateDuration } from '../../utils/calculateDuration';
-import { calculateDistanceKm } from '../../utils/calculateDistance';
+import { calculateDistanceKm, calculateDistanceM } from '../../utils/calculateDistance';
 
 @Injectable()
 export class UserLocationService {
@@ -231,40 +231,99 @@ export class UserLocationService {
   }
 
 
+  // async createLocationUserV2(
+  //   userId: any,
+  //   lat: any,
+  //   lng: any,
+  //   isActive: any,
+  //   speed: any,
+  // ): Promise<any> {
+  //   try {
+  //     const payload: any = {
+  //       user_id: userId,
+  //       lat: lat,
+  //       lng: lng,
+  //       isActive: isActive,
+  //       speed: speed,
+  //       status: ''
+  //     }
+
+  //     const findLastLocation = await this.locationUserRepository.findOne({
+  //       where: {
+  //         user_id: Like(userId)
+  //       },
+  //       order: {created_at: "DESC"},
+  //       relations: ['users']
+  //     })
+
+  //     if(!findLastLocation) {
+  //       console.log('user tidak ditemukan')
+  //     }else{
+  //       const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
+  //       if(filterDistance <= 100){
+  //         payload.status = 'still'
+  //       }
+  //       payload.status = 'moving'
+  //     }
+  //     const locationUser: any = this.locationUserRepository.create(payload);
+  //     const newLocationUser = await this.locationUserRepository.save(
+  //     locationUser,
+  //     );
+  //     this.timerService.create(lat, lng, userId)
+  //     return newLocationUser;
+  //   } catch (error) {
+  //     return error
+  //   }
+  // }
+
   async createLocationUserV2(
-    userId: any,
-    lat: any,
-    lng: any,
-    isActive: any,
-    speed: any,
-    isDriving: any,
-    status: string
+    userId: number,
+    lat: number,
+    lng: number,
+    isActive: boolean,
+    speed: number,
   ): Promise<any> {
     try {
-      // const locationJson = await getAddressComponents(lat, lng);
       const payload: any = {
         user_id: userId,
         lat: lat,
         lng: lng,
         isActive: isActive,
-        // location_json: locationJson
         speed: speed,
-        isDriving: isDriving,
-        status: status
+        status: ''
       }
-      // if (locationJson) {
-      // }
+  
+      const findLastLocation = await this.locationUserRepository.findOne({
+        where: {
+          user_id: Like(userId) 
+        },
+        order: {created_at: "DESC"},
+        relations: ['users']
+      })
+
+      console.log(findLastLocation)
+  
+      if(!findLastLocation) {
+        payload.status = 'still'
+      } else {
+        const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
+        if(filterDistance <= 100){
+          payload.status = 'still'
+        } else {
+          payload.status = 'moving'
+        }
+      }
       const locationUser: any = this.locationUserRepository.create(payload);
       const newLocationUser = await this.locationUserRepository.save(
         locationUser,
       );
-
       this.timerService.create(lat, lng, userId)
       return newLocationUser;
     } catch (error) {
       return error
     }
   }
+  
 
   async getForMobile(userId: string) {
     const queryBuilder =
