@@ -139,7 +139,7 @@ export class UserLocationService {
       queryBuilder.skip((page - 1) * limit).take(limit);
     }
 
-    const data= await queryBuilder.getManyAndCount();
+    const [data]= await queryBuilder.getManyAndCount();
 
     // Implementasi Douglas-Peucker Algorithm
     // data = data.map((locationUser: any) => {
