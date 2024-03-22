@@ -35,10 +35,10 @@ import { DuplicateRequestMiddleware } from '../../middleware/DuplicateRequestMid
   controllers: [UserLocationController],
   providers: [UserLocationService, SocketGateway, TimerService],
 })
-export class UserLocationModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(DuplicateRequestMiddleware)
-      .forRoutes({ path: 'user-locations/v2', method: RequestMethod.POST });
-  }
+export class UserLocationModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(DuplicateRequestMiddleware)
+  //     .forRoutes({ path: 'user-locations/v2', method: RequestMethod.POST });
+  // }
 }

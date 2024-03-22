@@ -65,9 +65,9 @@ export class UserLocationController {
     try {
       const {
         data,
-        page: currentPage,
-        totalPages,
-        totalRows,
+        // page: currentPage,
+        // totalPages,
+        // totalRows,
       } = await this.userLocationService.getLocationUsersV2(
         query.user_id,
         query.date,
@@ -78,9 +78,9 @@ export class UserLocationController {
       return res.status(200).json({
         status: true,
         message: 'Berhasil menampilkan lokasi user',
-        page: currentPage,
-        totalPages,
-        totalRows,
+        // page: currentPage,
+        // totalPages,
+        // totalRows,
         data,
       });
     } catch (error) {

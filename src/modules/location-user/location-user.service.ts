@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { And, Between, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import UserLocations from './location-user.entity';
 import { SocketGateway } from '../socket/socket.service';
 import { TimerService } from '../timer/timer.service';
@@ -73,6 +73,45 @@ export class UserLocationService {
     };
   }
 
+  // async getLocationUsersV2(
+  //   userId: string,
+  //   date: string,
+  //   sort: any,
+  //   page: number,
+  //   limit: number,
+  // ) {
+  //   const queryBuilder =
+  //     this.locationUserRepository.createQueryBuilder('lokasi_user');
+
+  //   if (userId) {
+  //     queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+  //       user_id: userId,
+  //     });
+  //   }
+
+  //   if (date)
+  //     queryBuilder.andWhere('DATE(lokasi_user.created_at) = :date', { date });
+
+  //   if (sort) {
+  //     queryBuilder.orderBy('lokasi_user.created_at', sort);
+  //   }
+
+  //   if (page && limit) {
+  //     queryBuilder.skip((page - 1) * limit).take(limit);
+  //   }
+
+  //   const [data, total] = await queryBuilder.getManyAndCount();
+
+  //   const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+
+  //   return {
+  //     data: data || [],
+  //     page: limit && page ? page : undefined,
+  //     totalPages,
+  //     totalRows: total,
+  //   };
+  // }
+
   async getLocationUsersV2(
     userId: string,
     date: string,
@@ -100,16 +139,68 @@ export class UserLocationService {
       queryBuilder.skip((page - 1) * limit).take(limit);
     }
 
-    const [data, total] = await queryBuilder.getManyAndCount();
+    let [data] = await queryBuilder.getManyAndCount();
 
-    const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
+    // Implementasi Douglas-Peucker Algorithm
+    data = data.map((locationUser: any) => {
+      console.log(locationUser)
+      // Terapkan algoritma Douglas-Peucker pada titik koordinat polyline
+      locationUser.polylineCoordinates = this.douglasPeuckerAlgorithm(locationUser.polylineCoordinates);
+      return locationUser;
+    });
+
+    // const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
 
     return {
       data: data || [],
-      page: limit && page ? page : undefined,
-      totalPages,
-      totalRows: total,
+      // page: limit && page ? page : undefined,
+      // totalPages,
+      // totalRows: total,
     };
+  }
+
+  douglasPeuckerAlgorithm(polylineCoordinates: any[]) {
+    const epsilon = 0.0001; // Nilai epsilon untuk algoritma Douglas-Peucker
+    const distance = (p1: any, p2: any) => {
+      const dx = p1.latitude - p2.latitude;
+      const dy = p1.longitude - p2.longitude;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const douglasPeuckerRecursive = (points: any[], first: number, last: number, dmax: number, result: any[]) => {
+      if (last <= first + 1) {
+        // Basis kasus: hanya ada dua titik, jadi jaraknya pasti nol
+        return;
+      }
+
+      // Temukan titik terjauh
+      let maxDistance = 0;
+      let index = 0;
+      for (let i = first + 1; i < last; i++) {
+        const d = distance(points[i], points[first]);
+        if (d > maxDistance) {
+          maxDistance = d;
+          index = i;
+        }
+      }
+
+      if (maxDistance > dmax) {
+        // Jika titik terjauh melebihi batas, tambahkan ke hasil
+        result.push(points[index]);
+        // Rekursif pada kedua sisi titik terjauh
+        douglasPeuckerRecursive(points, first, index, dmax, result);
+        douglasPeuckerRecursive(points, index, last, dmax, result);
+      }
+    };
+
+    // Mulai dengan menambahkan titik awal dan akhir ke hasil
+    const result = [polylineCoordinates[0]];
+    // Rekursif Douglas-Peucker pada seluruh polyline
+    douglasPeuckerRecursive(polylineCoordinates, 0, polylineCoordinates.length - 1, epsilon, result);
+    // Tambahkan titik terakhir ke hasil
+    result.push(polylineCoordinates[polylineCoordinates.length - 1]);
+
+    return result;
   }
 
   async getLocationUsersV3(
@@ -277,53 +368,52 @@ export class UserLocationService {
   // }
 
   async createLocationUserV2(
-    userId: number,
+    userId: any,
     lat: number,
     lng: number,
     isActive: boolean,
     speed: number,
   ): Promise<any> {
-    try {
-      const payload: any = {
-        user_id: userId,
-        lat: lat,
-        lng: lng,
-        isActive: isActive,
-        speed: speed,
-        status: ''
-      }
-  
-      const findLastLocation = await this.locationUserRepository.findOne({
-        where: {
-          user_id: Like(userId) 
-        },
-        order: {created_at: "DESC"},
-        relations: ['users']
-      })
-
-      console.log(findLastLocation)
-  
-      if(!findLastLocation) {
-        payload.status = 'still'
-      } else {
-        const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
-        if(filterDistance <= 100){
-          payload.status = 'still'
-        } else {
-          payload.status = 'moving'
-        }
-      }
-      const locationUser: any = this.locationUserRepository.create(payload);
-      const newLocationUser = await this.locationUserRepository.save(
-        locationUser,
-      );
-      this.timerService.create(lat, lng, userId)
-      return newLocationUser;
-    } catch (error) {
-      return error
+    const payload: any = {
+      user_id: userId,
+      lat: lat,
+      lng: lng,
+      isActive: isActive,
+      speed: speed,
+      status: ''
     }
+    console.log(payload.user_id)
+
+    const date = new Date();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59)
+    const findLastLocation = await this.locationUserRepository.findOne({
+      where: {
+        user_id: Like(payload.user_id),
+        created_at: Between(startOfDay, endOfDay),
+      },
+      order: { created_at: "DESC" },
+    })
+
+    if (!findLastLocation) {
+      payload.status = 'still'
+    } else {
+      const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
+      if (filterDistance >= 50) {
+        payload.status = 'moving'
+      }else{ 
+        payload.status = 'still'
+      }
+    }
+
+    const locationUser: any = this.locationUserRepository.create(payload);
+    const newLocationUser = await this.locationUserRepository.save(
+      locationUser,
+    );
+    this.timerService.create(lat, lng, userId)
+    return newLocationUser;
   }
-  
+
 
   async getForMobile(userId: string) {
     const queryBuilder =
