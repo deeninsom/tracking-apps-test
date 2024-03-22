@@ -139,15 +139,15 @@ export class UserLocationService {
       queryBuilder.skip((page - 1) * limit).take(limit);
     }
 
-    let [data] = await queryBuilder.getManyAndCount();
+    const data= await queryBuilder.getManyAndCount();
 
     // Implementasi Douglas-Peucker Algorithm
-    data = data.map((locationUser: any) => {
-      console.log(locationUser)
-      // Terapkan algoritma Douglas-Peucker pada titik koordinat polyline
-      locationUser.polylineCoordinates = this.douglasPeuckerAlgorithm(locationUser.polylineCoordinates);
-      return locationUser;
-    });
+    // data = data.map((locationUser: any) => {
+    //   console.log(locationUser)
+    //   // Terapkan algoritma Douglas-Peucker pada titik koordinat polyline
+    //   locationUser.polylineCoordinates = this.douglasPeuckerAlgorithm(locationUser.polylineCoordinates);
+    //   return locationUser;
+    // });
 
     // const totalPages = limit && page ? Math.ceil(total / limit) : undefined;
 
