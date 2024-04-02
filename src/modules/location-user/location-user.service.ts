@@ -159,49 +159,49 @@ export class UserLocationService {
     };
   }
 
-  douglasPeuckerAlgorithm(polylineCoordinates: any[]) {
-    const epsilon = 0.0001; // Nilai epsilon untuk algoritma Douglas-Peucker
-    const distance = (p1: any, p2: any) => {
-      const dx = p1.latitude - p2.latitude;
-      const dy = p1.longitude - p2.longitude;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
+  // douglasPeuckerAlgorithm(polylineCoordinates: any[]) {
+  //   const epsilon = 0.0001; // Nilai epsilon untuk algoritma Douglas-Peucker
+  //   const distance = (p1: any, p2: any) => {
+  //     const dx = p1.latitude - p2.latitude;
+  //     const dy = p1.longitude - p2.longitude;
+  //     return Math.sqrt(dx * dx + dy * dy);
+  //   };
 
-    const douglasPeuckerRecursive = (points: any[], first: number, last: number, dmax: number, result: any[]) => {
-      if (last <= first + 1) {
-        // Basis kasus: hanya ada dua titik, jadi jaraknya pasti nol
-        return;
-      }
+  //   const douglasPeuckerRecursive = (points: any[], first: number, last: number, dmax: number, result: any[]) => {
+  //     if (last <= first + 1) {
+  //       // Basis kasus: hanya ada dua titik, jadi jaraknya pasti nol
+  //       return;
+  //     }
 
-      // Temukan titik terjauh
-      let maxDistance = 0;
-      let index = 0;
-      for (let i = first + 1; i < last; i++) {
-        const d = distance(points[i], points[first]);
-        if (d > maxDistance) {
-          maxDistance = d;
-          index = i;
-        }
-      }
+  //     // Temukan titik terjauh
+  //     let maxDistance = 0;
+  //     let index = 0;
+  //     for (let i = first + 1; i < last; i++) {
+  //       const d = distance(points[i], points[first]);
+  //       if (d > maxDistance) {
+  //         maxDistance = d;
+  //         index = i;
+  //       }
+  //     }
 
-      if (maxDistance > dmax) {
-        // Jika titik terjauh melebihi batas, tambahkan ke hasil
-        result.push(points[index]);
-        // Rekursif pada kedua sisi titik terjauh
-        douglasPeuckerRecursive(points, first, index, dmax, result);
-        douglasPeuckerRecursive(points, index, last, dmax, result);
-      }
-    };
+  //     if (maxDistance > dmax) {
+  //       // Jika titik terjauh melebihi batas, tambahkan ke hasil
+  //       result.push(points[index]);
+  //       // Rekursif pada kedua sisi titik terjauh
+  //       douglasPeuckerRecursive(points, first, index, dmax, result);
+  //       douglasPeuckerRecursive(points, index, last, dmax, result);
+  //     }
+  //   };
 
-    // Mulai dengan menambahkan titik awal dan akhir ke hasil
-    const result = [polylineCoordinates[0]];
-    // Rekursif Douglas-Peucker pada seluruh polyline
-    douglasPeuckerRecursive(polylineCoordinates, 0, polylineCoordinates.length - 1, epsilon, result);
-    // Tambahkan titik terakhir ke hasil
-    result.push(polylineCoordinates[polylineCoordinates.length - 1]);
+  //   // Mulai dengan menambahkan titik awal dan akhir ke hasil
+  //   const result = [polylineCoordinates[0]];
+  //   // Rekursif Douglas-Peucker pada seluruh polyline
+  //   douglasPeuckerRecursive(polylineCoordinates, 0, polylineCoordinates.length - 1, epsilon, result);
+  //   // Tambahkan titik terakhir ke hasil
+  //   result.push(polylineCoordinates[polylineCoordinates.length - 1]);
 
-    return result;
-  }
+  //   return result;
+  // }
 
   async getLocationUsersV3(
     userId: string,
@@ -399,7 +399,7 @@ export class UserLocationService {
       payload.status = 'still'
     } else {
       const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
-      if (filterDistance >= 50) {
+      if (speed > 5) {
         payload.status = 'moving'
       }else{ 
         payload.status = 'still'
