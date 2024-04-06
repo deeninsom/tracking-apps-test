@@ -373,6 +373,8 @@ export class UserLocationService {
     lng: number,
     isActive: boolean,
     speed: number,
+    created_at: any,
+    updated_at: any,
   ): Promise<any> {
     const payload: any = {
       user_id: userId,
@@ -380,7 +382,9 @@ export class UserLocationService {
       lng: lng,
       isActive: isActive,
       speed: speed,
-      status: ''
+      status: '',
+      created_at: created_at,
+      updated_at: updated_at,
     }
     console.log(payload.user_id)
 
