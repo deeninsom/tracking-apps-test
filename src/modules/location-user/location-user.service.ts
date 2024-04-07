@@ -373,6 +373,7 @@ export class UserLocationService {
     lng: number,
     isActive: boolean,
     speed: number,
+    status: any,
     created_at: any,
     updated_at: any,
   ): Promise<any> {
@@ -382,7 +383,7 @@ export class UserLocationService {
       lng: lng,
       isActive: isActive,
       speed: speed,
-      status: '',
+      status: status,
       created_at: created_at,
       updated_at: updated_at,
     }
