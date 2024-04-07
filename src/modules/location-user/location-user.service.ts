@@ -386,29 +386,29 @@ export class UserLocationService {
       created_at: created_at,
       updated_at: updated_at,
     }
-    console.log(payload.user_id)
+    // console.log(payload.user_id)
 
-    const date = new Date();
-    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59)
-    const findLastLocation = await this.locationUserRepository.findOne({
-      where: {
-        user_id: Like(payload.user_id),
-        created_at: Between(startOfDay, endOfDay),
-      },
-      order: { created_at: "DESC" },
-    })
+    // const date = new Date();
+    // const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    // const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59)
+    // const findLastLocation = await this.locationUserRepository.findOne({
+    //   where: {
+    //     user_id: Like(payload.user_id),
+    //     created_at: Between(startOfDay, endOfDay),
+    //   },
+    //   order: { created_at: "DESC" },
+    // })
 
-    if (!findLastLocation) {
-      payload.status = 'still'
-    } else {
-      const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
-      if (speed > 5) {
-        payload.status = 'moving'
-      }else{ 
-        payload.status = 'still'
-      }
-    }
+    // if (!findLastLocation) {
+    //   payload.status = 'still'
+    // } else {
+    //   const filterDistance = calculateDistanceM(findLastLocation.lat, findLastLocation.lng, lat, lng)
+    //   if (speed > 5) {
+    //     payload.status = 'moving'
+    //   }else{ 
+    //     payload.status = 'still'
+    //   }
+    // }
 
     const locationUser: any = this.locationUserRepository.create(payload);
     const newLocationUser = await this.locationUserRepository.save(
