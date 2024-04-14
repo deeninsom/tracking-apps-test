@@ -153,6 +153,40 @@ export class UserLocationController {
     }
   }
 
+  @Get('v0')
+  async getLocationUsersV0(
+    @Query() query: QueryUserLocationV2DTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const {
+        data
+      } = await this.userLocationService.getLocationUsersV0(
+        query.user_id,
+        query.date,
+        query.sort
+      );
+      return res.status(200).json({
+        status: true,
+        message: 'sBerhasil menampilkan lokasi user',
+        data,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res
+          .status(error.getStatus())
+          .json({ status: false, message: error.message });
+      } else {
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
+      }
+    }
+  }
+  
+
   // @Get('sort-today')
   // async getForMobile(
   //   @Query() query: QueryUserLocationOnMobileDTO,

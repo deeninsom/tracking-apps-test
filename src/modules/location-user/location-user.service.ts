@@ -139,7 +139,7 @@ export class UserLocationService {
       queryBuilder.skip((page - 1) * limit).take(limit);
     }
 
-    const [data]= await queryBuilder.getManyAndCount();
+    const [data] = await queryBuilder.getManyAndCount();
 
     // Implementasi Douglas-Peucker Algorithm
     // data = data.map((locationUser: any) => {
@@ -321,6 +321,152 @@ export class UserLocationService {
     };
   }
 
+  async getLocationUsersV0(
+    userId: string,
+    date: string,
+    sort: any
+  ) {
+  const queryBuilder =
+    this.locationUserRepository.createQueryBuilder('lokasi_user');
+
+  if (userId) {
+    queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+      user_id: userId,
+    });
+  }
+
+  if (date)
+    queryBuilder.andWhere('DATE(lokasi_user.created_at) = :date', { date });
+
+  if (sort) {
+    queryBuilder.orderBy('lokasi_user.created_at', sort);
+  }
+
+  const [data] = await queryBuilder.getManyAndCount();
+
+  if (data.length > 0) {
+
+    async function groupData(data: any) {
+      const groupedData = [];
+      let tempGroup = {
+        time: "",
+        data: [],
+        status: "",
+        locationStart: "",
+        locationEnd: ""
+      };
+
+      let getLocation = {
+        startLatitude: 0,
+        startLongitude: 0,
+        endLatitude: 0,
+        endLongitude: 0
+      };
+
+      let lastData: any = null;
+      let totalStillTime = 0;
+
+      data.forEach((entry: any, index: any) => {
+        if (lastData) {
+          const distance = calculateDistanceKm(lastData.lat, lastData.lng, entry.lat, entry.lng);
+          const timeDiff = new Date(entry.created_at).getTime() - new Date(lastData.created_at).getTime();
+          const distanceThreshold = 0.005; // 5 meters
+
+          if (distance > distanceThreshold || timeDiff > 300000) { // 5 minutes
+            if (tempGroup.data.length > 0) {
+              if (tempGroup.status === "still") {
+                totalStillTime += timeDiff;
+              } else {
+                const startTime = new Date(tempGroup.data[0].created_at);
+                const endTime = new Date(lastData.created_at);
+                const duration = calculateDuration(startTime, endTime);
+                tempGroup.time = `${formatTime(startTime)} - ${formatTime(endTime)} (${duration})`;
+                tempGroup.locationEnd = `${entry.lat}, ${entry.lng}`;
+                tempGroup.locationStart = `${tempGroup.data[0].latitude}, ${tempGroup.data[0].longitude}`;
+                groupedData.push({ ...tempGroup });
+              }
+              tempGroup.data = [];
+            }
+
+            if (distance > distanceThreshold) {
+              tempGroup = {
+                time: entry.created_at,
+                data: [entry],
+                status: "moving",
+                locationStart: `${entry.lat}, ${entry.lng}`,
+                locationEnd: ""
+              };
+            } else {
+              tempGroup = {
+                time: entry.created_at,
+                data: [entry],
+                status: "still",
+                locationStart: `${entry.lat}, ${entry.lng}`,
+                locationEnd: `${entry.lat}, ${entry.lng}`
+              };
+            }
+          } else {
+            tempGroup.data.push(entry);
+          }
+        } else {
+          tempGroup.data.push(entry);
+        }
+
+        lastData = entry;
+      });
+
+      if (tempGroup.data.length > 0) {
+        const startTime = new Date(tempGroup.data[0].created_at);
+        const endTime = new Date(lastData.created_at);
+        const duration = calculateDuration(startTime, endTime);
+        tempGroup.time = `${formatTime(startTime)} - ${formatTime(endTime)} (${duration})`;
+        tempGroup.locationEnd = `${lastData.lat}, ${lastData.lng}`;
+        tempGroup.locationStart = `${tempGroup.data[0].latitude}, ${tempGroup.data[0].longitude}`;
+        if (tempGroup.status === "still") {
+          totalStillTime += new Date(lastData.created_at).getTime() - new Date(tempGroup.data[0].created_at).getTime();
+        } else {
+          getLocation.startLatitude = tempGroup.data[0].latitude;
+          getLocation.startLongitude = tempGroup.data[0].longitude;
+          getLocation.endLatitude = lastData.lat;
+          getLocation.endLongitude = lastData.lng;
+        }
+        groupedData.push({ ...tempGroup });
+      }
+
+      groupedData.forEach((group, index) => {
+        if (group.status === "moving") {
+          let totalDistance = 0;
+          for (let i = 0; i < group.data.length - 1; i++) {
+            const { latitude: lat1, longitude: lon1 } = group.data[i];
+            const { latitude: lat2, longitude: lon2 } = group.data[i + 1];
+            totalDistance += calculateDistanceKm(lat1, lon1, lat2, lon2);
+          }
+          group.distance = totalDistance.toFixed(2);
+        }
+      });
+
+      const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude);
+      const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude);
+      groupedData.forEach((item) => {
+        if (item.status === 'moving') {
+          item.locationStart = result1;
+          item.locationEnd = result2;
+        } else {
+          item.locationStart = result1;
+        }
+      });
+
+      return { data: groupedData, totalStillTime };
+    }
+
+    const result = await groupData(data);
+
+    return result;
+  }
+
+  return { data: [], totalStillTime: 0 };
+}
+
 
   // async createLocationUserV2(
   //   userId: any,
@@ -368,25 +514,25 @@ export class UserLocationService {
   // }
 
   async createLocationUserV2(
-    userId: any,
-    lat: number,
-    lng: number,
-    isActive: boolean,
-    speed: number,
-    status: any,
-    created_at: any,
-    updated_at: any,
-  ): Promise<any> {
-    const payload: any = {
-      user_id: userId,
-      lat: lat,
-      lng: lng,
-      isActive: isActive,
-      speed: speed,
-      status: status,
-      created_at: created_at,
-      updated_at: updated_at,
-    }
+  userId: any,
+  lat: number,
+  lng: number,
+  isActive: boolean,
+  speed: number,
+  status: any,
+  created_at: any,
+  updated_at: any,
+): Promise < any > {
+  const payload: any = {
+    user_id: userId,
+    lat: lat,
+    lng: lng,
+    isActive: isActive,
+    speed: speed,
+    status: status,
+    created_at: created_at,
+    updated_at: updated_at,
+  }
     // console.log(payload.user_id)
 
     // const date = new Date();
@@ -412,71 +558,71 @@ export class UserLocationService {
     // }
 
     const locationUser: any = this.locationUserRepository.create(payload);
-    const newLocationUser = await this.locationUserRepository.save(
-      locationUser,
-    );
-    this.timerService.create(lat, lng, userId)
+  const newLocationUser = await this.locationUserRepository.save(
+    locationUser,
+  );
+  this.timerService.create(lat, lng, userId)
     return newLocationUser;
-  }
+}
 
 
   async getForMobile(userId: string) {
-    const queryBuilder =
-      this.locationUserRepository.createQueryBuilder('lokasi_user');
-    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+  const queryBuilder =
+    this.locationUserRepository.createQueryBuilder('lokasi_user');
+  queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
 
-    if (userId) {
-      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
-        user_id: userId,
-      });
-      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
-      queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
-    }
-
-    const [data] = await queryBuilder.getManyAndCount();
-
-    return {
-      data: data || [],
-    };
-  }
-
-  async getId(id: string): Promise<UserLocations> {
-    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
-    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
-    queryBuilder.andWhere(
-      `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id }
-    );
-    return queryBuilder.getOne();
-  }
-
-  create(payload: any): Promise<UserLocations[]> {
-    return new Promise((resolve, reject) => {
-      const userLocation = this.locationUserRepository.create(payload);
-      this.locationUserRepository
-        .save(userLocation)
-        .then(async (createdUserLocation: any) => {
-          return this.timerService
-            .create(payload.lat, payload.lng, payload.user_id)
-            .then(() => {
-              this.socketGateway.server.emit('received-locations', {
-                data: createdUserLocation,
-              });
-              resolve(createdUserLocation);
-            })
-            .catch((timerError) => {
-              console.error('Error occurred while creating timer:', timerError);
-              reject(timerError);
-            });
-        })
-        .catch((saveError) => {
-          console.error(
-            'Error occurred while saving user location:',
-            saveError,
-          );
-          reject(saveError);
-        });
+  if (userId) {
+    queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+      user_id: userId,
     });
+    queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
+    queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
   }
+
+  const [data] = await queryBuilder.getManyAndCount();
+
+  return {
+    data: data || [],
+  };
+}
+
+  async getId(id: string): Promise < UserLocations > {
+  const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+  queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+  queryBuilder.andWhere(
+    `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id }
+  );
+  return queryBuilder.getOne();
+}
+
+create(payload: any): Promise < UserLocations[] > {
+  return new Promise((resolve, reject) => {
+    const userLocation = this.locationUserRepository.create(payload);
+    this.locationUserRepository
+      .save(userLocation)
+      .then(async (createdUserLocation: any) => {
+        return this.timerService
+          .create(payload.lat, payload.lng, payload.user_id)
+          .then(() => {
+            this.socketGateway.server.emit('received-locations', {
+              data: createdUserLocation,
+            });
+            resolve(createdUserLocation);
+          })
+          .catch((timerError) => {
+            console.error('Error occurred while creating timer:', timerError);
+            reject(timerError);
+          });
+      })
+      .catch((saveError) => {
+        console.error(
+          'Error occurred while saving user location:',
+          saveError,
+        );
+        reject(saveError);
+      });
+  });
+}
 
   // async create(payload: any): Promise<UserLocations[]> {
   //   const userLocation = this.locationUserRepository.create(payload);
@@ -509,38 +655,38 @@ export class UserLocationService {
   //   return createdLocations;
   // }
 
-  async update(id: string, payload: any): Promise<UserLocations> {
-    const userLocation = await this.locationUserRepository.findOne({
-      where: { id },
-    });
+  async update(id: string, payload: any): Promise < UserLocations > {
+  const userLocation = await this.locationUserRepository.findOne({
+    where: { id },
+  });
 
-    if (!userLocation)
+  if(!userLocation)
       throw new HttpException(
-        `Lokasi user dengan id ${id} tidak ditemukan !`,
-        HttpStatus.NOT_FOUND,
-      );
+    `Lokasi user dengan id ${id} tidak ditemukan !`,
+    HttpStatus.NOT_FOUND,
+  );
 
-    await this.locationUserRepository.update(id, payload);
-    const updatedUser = await this.locationUserRepository.findOne({
-      where: { id },
-    });
+  await this.locationUserRepository.update(id, payload);
+  const updatedUser = await this.locationUserRepository.findOne({
+    where: { id },
+  });
 
-    return updatedUser;
-  }
+  return updatedUser;
+}
 
-  async delete(id: string): Promise<void> {
-    const userLocation = await this.locationUserRepository.findOne({
-      where: { id },
-    });
+  async delete (id: string): Promise < void> {
+  const userLocation = await this.locationUserRepository.findOne({
+    where: { id },
+  });
 
-    if (!userLocation)
+  if(!userLocation)
       throw new HttpException(
-        `Lokasi user dengan id ${id} tidak ditemukan !`,
-        HttpStatus.NOT_FOUND,
-      );
+    `Lokasi user dengan id ${id} tidak ditemukan !`,
+    HttpStatus.NOT_FOUND,
+  );
 
-    await this.locationUserRepository.delete(id);
-  }
+  await this.locationUserRepository.delete(id);
+}
 
   // formatTime(date: Date): string {
   //   const hours = date.getHours();

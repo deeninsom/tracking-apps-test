@@ -44,9 +44,9 @@ export default class UserLocations {
   @Column({})
   status: string
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'datetime' })
   public created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'datetime' })
   public updated_at: Date;
 }
