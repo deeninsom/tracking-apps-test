@@ -299,13 +299,27 @@ export class UserLocationService {
 
         const result1 = await getAddress(getLocation.startLatitude, getLocation.startLongitude)
         const result2 = await getAddress(getLocation.endLatitude, getLocation.endLongitude)
-        groupedData.forEach((item) => {
+        // groupedData.forEach(async (item) => {
+        //   if (item.status === 'moving') {
+        //     item.locationStart = result1
+        //     item.locationEnd = result2
+        //   }else{
+        //     const resultStill = await getAddress(item.data[0].latitude, item.data[0].longitude)
+        //     item.locationStart = resultStill
+        //   }
+        // })
+        const getAddressPromises = groupedData.map(async (item) => {
           if (item.status === 'moving') {
-            item.locationStart = result1
-            item.locationEnd = result2
+            item.locationStart = result1;
+            item.locationEnd = result2;
+          } else {
+            const resultStill = await getAddress(item.data[0].latitude, item.data[0].longitude);
+            item.locationStart = resultStill;
           }
-          item.locationStart = result1
-        })
+        });
+
+        await Promise.all(getAddressPromises);
+
 
         return groupedData;
       }
@@ -367,25 +381,25 @@ export class UserLocationService {
   // }
 
   async createLocationUserV2(
-  userId: any,
-  lat: number,
-  lng: number,
-  isActive: boolean,
-  speed: number,
-  status: any,
-  created_at: any,
-  updated_at: any,
-): Promise < any > {
-  const payload: any = {
-    user_id: userId,
-    lat: lat,
-    lng: lng,
-    isActive: isActive,
-    speed: speed,
-    status: status,
-    created_at: created_at,
-    updated_at: updated_at,
-  }
+    userId: any,
+    lat: number,
+    lng: number,
+    isActive: boolean,
+    speed: number,
+    status: any,
+    created_at: any,
+    updated_at: any,
+  ): Promise<any> {
+    const payload: any = {
+      user_id: userId,
+      lat: lat,
+      lng: lng,
+      isActive: isActive,
+      speed: speed,
+      status: status,
+      created_at: created_at,
+      updated_at: updated_at,
+    }
     // console.log(payload.user_id)
 
     // const date = new Date();
@@ -411,71 +425,71 @@ export class UserLocationService {
     // }
 
     const locationUser: any = this.locationUserRepository.create(payload);
-  const newLocationUser = await this.locationUserRepository.save(
-    locationUser,
-  );
-  this.timerService.create(lat, lng, userId)
+    const newLocationUser = await this.locationUserRepository.save(
+      locationUser,
+    );
+    this.timerService.create(lat, lng, userId)
     return newLocationUser;
-}
+  }
 
 
   async getForMobile(userId: string) {
-  const queryBuilder =
-    this.locationUserRepository.createQueryBuilder('lokasi_user');
-  queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+    const queryBuilder =
+      this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
 
-  if (userId) {
-    queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
-      user_id: userId,
-    });
-    queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
-    queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
+    if (userId) {
+      queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', {
+        user_id: userId,
+      });
+      queryBuilder.andWhere('DATE(lokasi_user.created_at) = CURDATE()');
+      queryBuilder.addOrderBy('lokasi_user.created_at', 'DESC');
+    }
+
+    const [data] = await queryBuilder.getManyAndCount();
+
+    return {
+      data: data || [],
+    };
   }
 
-  const [data] = await queryBuilder.getManyAndCount();
+  async getId(id: string): Promise<UserLocations> {
+    const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+    queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
+    queryBuilder.andWhere(
+      `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id }
+    );
+    return queryBuilder.getOne();
+  }
 
-  return {
-    data: data || [],
-  };
-}
-
-  async getId(id: string): Promise < UserLocations > {
-  const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
-  queryBuilder.leftJoinAndSelect('lokasi_user.user_id', 'user_id');
-  queryBuilder.andWhere(
-    `lokasi_user.created_at = (SELECT MAX(created_at) FROM user_locations WHERE user_id = :id)`, { id }
-  );
-  return queryBuilder.getOne();
-}
-
-create(payload: any): Promise < UserLocations[] > {
-  return new Promise((resolve, reject) => {
-    const userLocation = this.locationUserRepository.create(payload);
-    this.locationUserRepository
-      .save(userLocation)
-      .then(async (createdUserLocation: any) => {
-        return this.timerService
-          .create(payload.lat, payload.lng, payload.user_id)
-          .then(() => {
-            this.socketGateway.server.emit('received-locations', {
-              data: createdUserLocation,
+  create(payload: any): Promise<UserLocations[]> {
+    return new Promise((resolve, reject) => {
+      const userLocation = this.locationUserRepository.create(payload);
+      this.locationUserRepository
+        .save(userLocation)
+        .then(async (createdUserLocation: any) => {
+          return this.timerService
+            .create(payload.lat, payload.lng, payload.user_id)
+            .then(() => {
+              this.socketGateway.server.emit('received-locations', {
+                data: createdUserLocation,
+              });
+              resolve(createdUserLocation);
+            })
+            .catch((timerError) => {
+              console.error('Error occurred while creating timer:', timerError);
+              reject(timerError);
             });
-            resolve(createdUserLocation);
-          })
-          .catch((timerError) => {
-            console.error('Error occurred while creating timer:', timerError);
-            reject(timerError);
-          });
-      })
-      .catch((saveError) => {
-        console.error(
-          'Error occurred while saving user location:',
-          saveError,
-        );
-        reject(saveError);
-      });
-  });
-}
+        })
+        .catch((saveError) => {
+          console.error(
+            'Error occurred while saving user location:',
+            saveError,
+          );
+          reject(saveError);
+        });
+    });
+  }
 
   // async create(payload: any): Promise<UserLocations[]> {
   //   const userLocation = this.locationUserRepository.create(payload);
@@ -508,38 +522,38 @@ create(payload: any): Promise < UserLocations[] > {
   //   return createdLocations;
   // }
 
-  async update(id: string, payload: any): Promise < UserLocations > {
-  const userLocation = await this.locationUserRepository.findOne({
-    where: { id },
-  });
+  async update(id: string, payload: any): Promise<UserLocations> {
+    const userLocation = await this.locationUserRepository.findOne({
+      where: { id },
+    });
 
-  if(!userLocation)
+    if (!userLocation)
       throw new HttpException(
-    `Lokasi user dengan id ${id} tidak ditemukan !`,
-    HttpStatus.NOT_FOUND,
-  );
+        `Lokasi user dengan id ${id} tidak ditemukan !`,
+        HttpStatus.NOT_FOUND,
+      );
 
-  await this.locationUserRepository.update(id, payload);
-  const updatedUser = await this.locationUserRepository.findOne({
-    where: { id },
-  });
+    await this.locationUserRepository.update(id, payload);
+    const updatedUser = await this.locationUserRepository.findOne({
+      where: { id },
+    });
 
-  return updatedUser;
-}
+    return updatedUser;
+  }
 
-  async delete (id: string): Promise < void> {
-  const userLocation = await this.locationUserRepository.findOne({
-    where: { id },
-  });
+  async delete(id: string): Promise<void> {
+    const userLocation = await this.locationUserRepository.findOne({
+      where: { id },
+    });
 
-  if(!userLocation)
+    if (!userLocation)
       throw new HttpException(
-    `Lokasi user dengan id ${id} tidak ditemukan !`,
-    HttpStatus.NOT_FOUND,
-  );
+        `Lokasi user dengan id ${id} tidak ditemukan !`,
+        HttpStatus.NOT_FOUND,
+      );
 
-  await this.locationUserRepository.delete(id);
-}
+    await this.locationUserRepository.delete(id);
+  }
 
   // formatTime(date: Date): string {
   //   const hours = date.getHours();
