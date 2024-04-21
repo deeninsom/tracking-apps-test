@@ -227,9 +227,6 @@ export class UserLocationService {
     const [data] = await queryBuilder.getManyAndCount();
 
     if (data.length > 0) {
-
-
-
       async function groupData(data: any) {
         const groupedData = [];
         const tempGroup = {
