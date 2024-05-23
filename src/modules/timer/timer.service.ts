@@ -39,7 +39,7 @@ export class TimerService {
     ]);
 
     if (date)
-      queryBuilder.andWhere('DATE(timer.inLocation) = :date', { date });
+      queryBuilder.andWhere('DATE(timer.inLocation) LIKE :date', { date });
 
     const data = await queryBuilder.getMany();
     return data
