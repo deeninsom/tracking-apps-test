@@ -30,6 +30,7 @@ export class TimerService {
       'timer.lat',
       'timer.lng',
       'timer.inLocation',
+      'timer.inLocation',
       // 'user_id.id',
       // 'user_id.name',
       // 'user_id.username',
