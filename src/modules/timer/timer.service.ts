@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import Timers from './timer.entity';
 import WorkLocationLists from '../work-location/entity/work.location-list.entity';
 import { formateDateNow } from '../../utils/format-date.utils';
@@ -16,6 +16,33 @@ export class TimerService {
     @InjectRepository(WorkLocationLists)
     private workLocationListRepository: Repository<WorkLocationLists>
   ) { }
+
+  async getDataLocation(
+    userId: any,
+    date: string,
+  ) {
+    const queryBuilder = this.timerRepository.createQueryBuilder('timer');
+    queryBuilder.leftJoinAndSelect('timer.user_id', 'user_id')
+    queryBuilder.andWhere('timer.user_id LIKE :user_id', { user_id: userId });
+    // queryBuilder.andWhere('timer.inLocation LIKE :dates', { dates:  });
+    queryBuilder.addOrderBy('timer.inLocation', 'ASC');
+    queryBuilder.select([
+      'timer.lat',
+      'timer.lng',
+      'timer.inLocation',
+      // 'user_id.id',
+      // 'user_id.name',
+      // 'user_id.username',
+      // 'timer.created_at',
+      // 'timer.updated_at'
+    ]);
+
+    if (date)
+      queryBuilder.andWhere('DATE(timer.inLocation) = :date', { date });
+
+    const data = await queryBuilder.getMany();
+    return data
+  }
 
   async get(userId: string) {
     const queryBuilder = this.timerRepository.createQueryBuilder('timer');
@@ -89,6 +116,8 @@ export class TimerService {
 
     if (timerCreated) {
       const createTimer = this.timerRepository.create({
+        lat: lat,
+        lng: lng,
         inLocation: formateDate,
         user_id: userId,
         location_id: locationId

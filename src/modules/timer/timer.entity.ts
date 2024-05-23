@@ -21,6 +21,12 @@ export default class Timers {
   @Column()
   inLocation: string;
 
+  @Column({ type: 'double' })
+  lat: number;
+
+  @Column({ type: 'double' })
+  lng: number;
+
   @ManyToOne(() => Users, {
     onDelete: 'CASCADE',
     onUpdate: "CASCADE"
