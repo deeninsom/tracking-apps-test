@@ -90,41 +90,88 @@ export class TimerService {
     return data;
   }
 
-  async create(lat: any, lng: any, userId: any) {
+  // async create(lat: any, lng: any, userId: any, createdAt: any) {
+  //   const queryLocation = this.workLocationListRepository.createQueryBuilder('location_list');
+  //   queryLocation.leftJoinAndSelect('location_list.location_id', 'location_id');
+  //   queryLocation.select(['location_list.id', 'location_list.lat', 'location_list.lng', 'location_id.id', 'location_list.list_number', 'location_id.range']);
+  //   queryLocation.orderBy('location_list.list_number', 'ASC');
+  //   const locations = await queryLocation.getMany();
+
+  //   const formateDate = formateDateNow()
+  //   let timerCreated = true;
+  //   let locationId: any;
+
+  //   await Promise.all(locations.map(async (location: any) => {
+  //     const resultDistance = await calculateDistance({ lat, lng }, { lat: location.lat, lng: location.lng });
+  //     if (resultDistance >= location.range) {
+  //       timerCreated = false
+  //     }
+  //     // console.log(location)
+
+  //     // timerCreated = true
+  //     // if (timerCreated) {
+  //     //   locationId = location.location_id.id;
+  //     // }
+  //     if (timerCreated === true) {
+  //       locationId = location.location_id.id;
+  //     }
+
+  //     // console.log(resultDistance)
+  //   }));
 
 
+  //   if (timerCreated) {
+  //     console.log(timerCreated)
+  //     const createTimer = this.timerRepository.create({
+  //       lat: lat,
+  //       lng: lng,
+  //       inLocation: createdAt,
+  //       user_id: userId,
+  //       location_id: locationId
+  //     });
+  //     // await this.timerRepository.save(createTimer);
+  //   }
+  // }
+
+  async create(lat: any, lng: any, userId: any, createdAt: any) {
     const queryLocation = this.workLocationListRepository.createQueryBuilder('location_list');
     queryLocation.leftJoinAndSelect('location_list.location_id', 'location_id');
     queryLocation.select(['location_list.id', 'location_list.lat', 'location_list.lng', 'location_id.id', 'location_list.list_number', 'location_id.range']);
     queryLocation.orderBy('location_list.list_number', 'ASC');
-    const locations = await queryLocation.getMany();
+    const locations: any = await queryLocation.getMany();
 
-    const formateDate = formateDateNow()
-    let timerCreated = false;
+
+    let timerCreated = false; // Ubah inisialisasi ke false
     let locationId: any;
 
-    await Promise.all(locations.map(async (location: any) => {
+    // Periksa setiap lokasi
+    for (const location of locations) {
       const resultDistance = await calculateDistance({ lat, lng }, { lat: location.lat, lng: location.lng });
-      if (resultDistance >= location.range) {
-        timerCreated = false
-      }
 
-      timerCreated = true
-      if (timerCreated) {
-        locationId = location.location_id.id;
+      if (resultDistance <= location?.location_id?.range) { // Ganti operator ke <=
+        timerCreated = true; // Jika jaraknya masuk ke dalam rentang, set timerCreated ke true
+        locationId = location.location_id.id; // Simpan ID lokasi
+        break; // Keluar dari loop karena sudah menemukan lokasi yang sesuai
       }
-    }));
-
-    if (timerCreated) {
-      const createTimer = this.timerRepository.create({
-        lat: lat,
-        lng: lng,
-        inLocation: formateDate,
-        user_id: userId,
-        location_id: locationId
-      });
-      await this.timerRepository.save(createTimer);
     }
+
+    // Jika timerCreated masih false, berarti tidak ada lokasi yang sesuai, maka tidak membuat timer
+    if (!timerCreated) {
+      console.log("Jarak melebihi batas untuk semua lokasi");
+      return; // Keluar dari fungsi
+    }
+
+    // Buat timer karena jaraknya masuk ke dalam rentang
+    const createTimer = this.timerRepository.create({
+      lat: lat,
+      lng: lng,
+      inLocation: createdAt,
+      user_id: userId,
+      location_id: locationId
+    });
+
+    await this.timerRepository.save(createTimer);
   }
+
 
 }

@@ -425,7 +425,7 @@ export class UserLocationService {
     const newLocationUser = await this.locationUserRepository.save(
       locationUser,
     );
-    this.timerService.create(lat, lng, userId)
+    this.timerService.create(lat, lng, userId, locationUser.created_at)
     return newLocationUser;
   }
 
@@ -466,7 +466,7 @@ export class UserLocationService {
         .save(userLocation)
         .then(async (createdUserLocation: any) => {
           return this.timerService
-            .create(payload.lat, payload.lng, payload.user_id)
+            .create(payload.lat, payload.lng, payload.user_id, payload.created_at)
             .then(() => {
               this.socketGateway.server.emit('received-locations', {
                 data: createdUserLocation,
