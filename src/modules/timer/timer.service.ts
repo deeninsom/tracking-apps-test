@@ -146,6 +146,7 @@ export class TimerService {
 
     // Periksa setiap lokasi
     for (const location of locations) {
+      console.log(location)
       const resultDistance = await calculateDistance({ lat, lng }, { lat: location.lat, lng: location.lng });
 
       if (resultDistance <= location?.location_id?.range) { // Ganti operator ke <=
