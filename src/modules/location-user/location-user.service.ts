@@ -348,7 +348,7 @@ export class UserLocationService {
     let totalDistanceKm = 0;
     let totalMinutes = 0;
 
-    if (resultTime.length >= 0) {
+    if (resultTime.length > 0) {
       const formatTime = (date: Date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
       for (let i = 0; i < resultTime.length - 1; i++) {
         const start = { latitude: resultTime[i]?.lat, longitude: resultTime[i]?.lng };
