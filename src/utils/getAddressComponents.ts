@@ -19,7 +19,7 @@ export const getAddressComponents = async (lat: any, lng: any) => {
 };
 
 export const getAddress = async (lat: any, lng: any) => {
-  if(!lat || !lng) return null
+  if (!lat || !lng) return null
   try {
     const googleMapsResponse = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_KEY}`,

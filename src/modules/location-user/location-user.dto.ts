@@ -24,6 +24,24 @@ export class UpdateUserLocationDTO {
   lng: number;
 }
 
+export class GetUserLocationV0DTO {
+  @ApiProperty({
+    description: 'find By user_id',
+    required: false,
+  })
+  @IsOptional()
+  user_id?: string;
+
+
+  @ApiProperty({
+    description: 'find By date (YYYY-MM-DD)',
+    required: false,
+  })
+  @IsOptional()
+  date?: string;
+
+}
+
 export class QueryUserLocationDTO {
   // @ApiProperty({
   //   description: 'find By user_id',

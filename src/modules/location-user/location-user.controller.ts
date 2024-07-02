@@ -1,35 +1,36 @@
 import {
+  Body,
   Controller,
-  UseGuards,
+  Delete,
   Get,
+  HttpException,
+  Param,
   Post,
   Put,
-  Delete,
-  Param,
-  Body,
   Query,
   Res,
-  HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/auth.guard';
 import { Response } from 'express';
-import { UserLocationService } from './location-user.service';
+import { AuthGuard } from '../auth/auth.guard';
 import {
   CreateLocationUserV2DTO,
   CreateUserLocationDTO,
+  GetUserLocationV0DTO,
   QueryUserLocationDTO,
   // QueryUserLocationOnMobileDTO,
   QueryUserLocationV2DTO,
   UpdateUserLocationDTO,
 } from './location-user.dto';
+import { UserLocationService } from './location-user.service';
 
 @ApiTags('user-locations')
 @Controller('user-locations')
 @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')
 export class UserLocationController {
-  constructor(private readonly userLocationService: UserLocationService) {}
+  constructor(private readonly userLocationService: UserLocationService) { }
 
   @Get()
   async get(@Query() query: QueryUserLocationDTO, @Res() res: Response) {
@@ -105,7 +106,7 @@ export class UserLocationController {
   ) {
     try {
       const { userId, lat, lng, isActive, speed, status, created_at, updated_at } = body;
-      const newLocationUser = await this.userLocationService.createLocationUserV2(userId, lat, lng, isActive, speed,status, created_at, updated_at);
+      const newLocationUser = await this.userLocationService.createLocationUserV2(userId, lat, lng, isActive, speed, status, created_at, updated_at);
       return res.status(201).json({
         status: true,
         message: 'Berhasil menambahkan lokasi user',
@@ -152,7 +153,39 @@ export class UserLocationController {
       }
     }
   }
-  
+
+  @Get('0')
+  async getLocationUsers0(
+    @Query() query: GetUserLocationV0DTO,
+    @Res() res: Response,
+  ) {
+    try {
+      const {
+        data
+      } = await this.userLocationService.getLocationUsers0(
+        query.user_id,
+        query.date
+      );
+      return res.status(200).json({
+        status: true,
+        message: 'Berhasil menampilkan lokasi user',
+        data,
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        return res
+          .status(error.getStatus())
+          .json({ status: false, message: error.message });
+      } else {
+        return res.status(500).json({
+          status: false,
+          message: 'Terjadi kesalahan server !',
+          error: error.message,
+        });
+      }
+    }
+  }
+
   // @Get('sort-today')
   // async getForMobile(
   //   @Query() query: QueryUserLocationOnMobileDTO,
