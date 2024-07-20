@@ -30,6 +30,18 @@ export function calculateDistanceKm(lat1: any, lon1: any, lat2: any, lon2: any) 
     return distance;
 }
 
+export function calculateDistanceNe(coords1, coords2) {
+    const R = 6371;
+    const dLat = (coords2.lat - coords1.lat) * Math.PI / 180;
+    const dLon = (coords2.lng - coords1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(coords1.lat * Math.PI / 180) * Math.cos(coords2.lat * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+}
+
 export function calculateDistanceM(lat1: any, lon1: any, lat2: any, lon2: any) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;

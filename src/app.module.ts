@@ -62,4 +62,4 @@ import Timers from './modules/timer/timer.entity';
   controllers: [ImageController, AppController],
   providers: [CloudinaryService, SocketGateway],
 })
-export class AppModule {}
+export class AppModule { }

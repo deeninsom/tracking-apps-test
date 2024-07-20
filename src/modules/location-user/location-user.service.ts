@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { And, Between, LessThanOrEqual, Like, MoreThanOrEqual, Repository } from 'typeorm';
-import { calculateDistanceKm, calculateDistanceM } from '../../utils/calculateDistance';
+import { calculateDistanceKm, calculateDistanceM, calculateDistanceNe } from '../../utils/calculateDistance';
 import { calculateDuration } from '../../utils/calculateDuration';
 import { formatTime } from '../../utils/formatTime';
 import { getAddress } from '../../utils/getAddressComponents';
@@ -350,11 +350,12 @@ export class UserLocationService {
 
     if (resultTime.length > 0) {
       const formatTime = (date: Date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-      for (let i = 0; i < resultTime.length - 1; i++) {
-        const start = { latitude: resultTime[i]?.lat, longitude: resultTime[i]?.lng };
-        const end = { latitude: resultTime[i + 1]?.lat, longitude: resultTime[i + 1]?.lng };
-        const createdAt1 = new Date(resultTime[i]?.created_at);
-        const createdAt2 = new Date(resultTime[i + 1]?.created_at);
+
+      for (let i = 1; i < resultTime.length; i++) {
+        const start = { latitude: resultTime[i - 1]?.lat, longitude: resultTime[i - 1]?.lng };
+        const end = { latitude: resultTime[i]?.lat, longitude: resultTime[i]?.lng };
+        const createdAt1 = new Date(resultTime[i - 1]?.created_at);
+        const createdAt2 = new Date(resultTime[i]?.created_at);
 
         // Calculate time difference in seconds
         const diffSeconds = Math.abs((createdAt2.getTime() - createdAt1.getTime()) / 1000);
@@ -363,7 +364,7 @@ export class UserLocationService {
         totalMinutes += diffSeconds / 60;
 
         if (start.latitude != null && start.longitude != null && end.latitude != null && end.longitude != null) {
-          totalDistanceKm += calculateDistanceKm(start.longitude, start.latitude, end.longitude, end.latitude);
+          totalDistanceKm += calculateDistanceNe(resultTime[i - 1], resultTime[i]);
         }
       }
 
@@ -374,8 +375,8 @@ export class UserLocationService {
       const startTime = resultTime.length ? formatTime(new Date(resultTime[0].created_at)) : 'N/A';
       const endTime = resultTime.length ? formatTime(new Date(resultTime[resultTime.length - 1].created_at)) : 'N/A';
 
-      const firstAddress = await getAddress(resultTime[0]?.lat, resultTime[0]?.lng)
-      const lastAddress = await getAddress(resultTime[resultTime.length - 1]?.lat, resultTime[resultTime.length - 1]?.lng)
+      const firstAddress = await getAddress(resultTime[0]?.lat, resultTime[0]?.lng);
+      const lastAddress = await getAddress(resultTime[resultTime.length - 1]?.lat, resultTime[resultTime.length - 1]?.lng);
 
       return {
         data: {
@@ -395,8 +396,74 @@ export class UserLocationService {
         data: null
       };
     }
-
   }
+
+
+  // async getLocationUsers0(userId: string, date: string) {
+  //   const queryBuilder = this.locationUserRepository.createQueryBuilder('lokasi_user');
+
+  //   if (userId) {
+  //     queryBuilder.andWhere('lokasi_user.user_id LIKE :user_id', { user_id: userId });
+  //   }
+
+  //   if (date) {
+  //     queryBuilder.andWhere('DATE(lokasi_user.created_at) = :date', { date });
+  //   }
+  //   queryBuilder.orderBy('lokasi_user.created_at', 'ASC');
+
+  //   const resultTime = await queryBuilder.getMany();
+  //   let totalDistanceKm = 0;
+  //   let totalMinutes = 0;
+
+  //   if (resultTime.length > 0) {
+  //     const formatTime = (date: Date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  //     for (let i = 1; i < resultTime.length; i++) {
+  //       const start = { latitude: resultTime[i]?.lat, longitude: resultTime[i]?.lng };
+  //       const end = { latitude: resultTime[i - 1]?.lat, longitude: resultTime[i - 1]?.lng };
+  //       const createdAt1 = new Date(resultTime[i]?.created_at);
+  //       const createdAt2 = new Date(resultTime[i - 1]?.created_at);
+
+  //       // Calculate time difference in seconds
+  //       const diffSeconds = Math.abs((createdAt2.getTime() - createdAt1.getTime()) / 1000);
+
+  //       // Convert seconds to minutes and add to total
+  //       totalMinutes += diffSeconds / 60;
+
+  //       if (start.latitude != null && start.longitude != null && end.latitude != null && end.longitude != null) {
+  //         totalDistanceKm += calculateDistanceNe(resultTime[i - 1], resultTime[i]);
+  //       }
+  //     }
+
+  //     // Calculate total hours and minutes
+  //     const totalHours = Math.floor(totalMinutes / 60);
+  //     const remainingMinutes = Math.floor(totalMinutes % 60);
+
+  //     const startTime = resultTime.length ? formatTime(new Date(resultTime[0].created_at)) : 'N/A';
+  //     const endTime = resultTime.length ? formatTime(new Date(resultTime[resultTime.length - 1].created_at)) : 'N/A';
+
+  //     const firstAddress = await getAddress(resultTime[0]?.lat, resultTime[0]?.lng)
+  //     const lastAddress = await getAddress(resultTime[resultTime.length - 1]?.lat, resultTime[resultTime.length - 1]?.lng)
+
+  //     return {
+  //       data: {
+  //         totalKm: `${totalDistanceKm.toFixed(2)} km`,
+  //         duration: `${totalHours}h ${remainingMinutes}m`,
+  //         period: `${startTime} - ${endTime} (${totalHours}h ${remainingMinutes}m)`,
+  //         data: {
+  //           first: resultTime[0],
+  //           firstAddress: firstAddress,
+  //           last: resultTime[resultTime.length - 1],
+  //           lastAddress: lastAddress,
+  //         }
+  //       }
+  //     };
+  //   } else {
+  //     return {
+  //       data: null
+  //     };
+  //   }
+
+  // }
 
 
 
